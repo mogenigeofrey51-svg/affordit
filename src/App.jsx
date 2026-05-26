@@ -173,6 +173,52 @@ function generateBudgetInsights(budgetItems, incomeItems = incomeSources) {
   return insights.slice(0, 4);
 }
 
+function generateAskInsights({ amount, category }, budgetItems) {
+  const selectedBudget = budgetItems.find((budget) => budget.name === category);
+  const askAmount = Number(amount || 0);
+  const insights = [];
+
+  if (!selectedBudget) {
+    return [
+      "Choose a budget category so Affordit can compare this spend against your actual monthly limit.",
+      `This ask is ${money(askAmount)}. Affordit is currently using safe-to-spend as the fallback check.`,
+    ];
+  }
+
+  const spent = Number(selectedBudget.spent || 0);
+  const limit = Number(selectedBudget.limit || 0);
+  const remaining = limit - spent;
+  const afterAsk = remaining - askAmount;
+  const usedAfterAsk = pct(spent + askAmount, limit);
+  const dailyLimit = Number(selectedBudget.dailyLimit || 0);
+
+  if (afterAsk < 0) {
+    insights.push(`${selectedBudget.name} will go over budget by ${money(Math.abs(afterAsk))}. Affordit should suggest a cheaper option or a delay.`);
+  } else {
+    insights.push(`${selectedBudget.name} has ${money(remaining)} left. After this ask, you would still have ${money(afterAsk)} left.`);
+  }
+
+  if (selectedBudget.hasDailyLimit && askAmount > dailyLimit) {
+    insights.push(`This is above your daily ${selectedBudget.name.toLowerCase()} limit of ${money(dailyLimit)}. The monthly budget may still look okay, but daily pacing says slow down.`);
+  }
+
+  if (usedAfterAsk >= 90) {
+    insights.push(`This would push ${selectedBudget.name} to ${usedAfterAsk}% used. Future asks in this category should be stricter this month.`);
+  } else if (usedAfterAsk >= 70) {
+    insights.push(`This would put ${selectedBudget.name} at ${usedAfterAsk}% used. Still possible, but keep the next few spends smaller.`);
+  } else {
+    insights.push(`This keeps ${selectedBudget.name} at ${usedAfterAsk}% used, which is still comfortable for the month.`);
+  }
+
+  if (askAmount > fakeBudget.safeAfterPlanned) {
+    insights.push(`This is higher than your safe-to-spend amount of ${money(fakeBudget.safeAfterPlanned)} after plans and commitments.`);
+  } else {
+    insights.push(`This stays within your safe-to-spend amount of ${money(fakeBudget.safeAfterPlanned)} after plans and commitments.`);
+  }
+
+  return insights.slice(0, 4);
+}
+
 function Button({ children, className = "", variant = "primary", ...props }) {
   const styles =
     variant === "secondary"
@@ -472,7 +518,13 @@ function Dashboard({ setScreen, incomeItems, expenseItems, budgetItems }) {
             <RuleMini key={rule.key} rule={rule} />
           ))}
         </div>
-        <p className="mt-4 rounded-xl bg-black/25 p-3 text-xs leading-5 text-white/70">{insights[0]}</p>
+      </div>
+
+      <SectionHeader title="Affordit AI insights" action="View budget" onClick={() => setScreen("budget")} />
+      <div className="space-y-3 px-5">
+        {insights.slice(0, 3).map((insight) => (
+          <InsightCard key={insight} text={insight} compact />
+        ))}
       </div>
 
       <SectionHeader title="Actual vs budget" action="See all" onClick={() => setScreen("budget")} />
@@ -545,6 +597,7 @@ function Ask({ setScreen, setPurchase, budgetItems }) {
   const askAmount = Number(amount || 0);
   const categoryRemaining = selectedBudget ? Number(selectedBudget.limit || 0) - Number(selectedBudget.spent || 0) : 0;
   const afterAskRemaining = categoryRemaining - askAmount;
+  const askInsights = generateAskInsights({ amount: askAmount, category }, budgetItems);
 
   function chooseScenario(scenario) {
     setItem(scenario.item);
@@ -636,6 +689,15 @@ function Ask({ setScreen, setPurchase, budgetItems }) {
             </div>
           </div>
         )}
+
+        <div>
+          <SectionRow title="Affordit AI insights" action="Budget-aware" />
+          <div className="mt-3 space-y-3">
+            {askInsights.map((insight) => (
+              <InsightCard key={insight} text={insight} compact />
+            ))}
+          </div>
+        </div>
 
         <div>
           <SectionRow title="Popular ideas" action="See all" />
@@ -974,11 +1036,11 @@ function BudgetComparisonCard({ row, updateBudget }) {
   );
 }
 
-function InsightCard({ text }) {
+function InsightCard({ text, compact = false }) {
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-[#151B2A] to-[#0C1019] p-4 ring-1 ring-[#8D3CFF]/20">
+    <div className={`rounded-2xl bg-gradient-to-br from-[#151B2A] to-[#0C1019] ring-1 ring-[#8D3CFF]/20 ${compact ? "p-3" : "p-4"}`}>
       <p className="text-xs font-black uppercase tracking-[0.2em] text-[#B36BFF]">Affordit AI</p>
-      <p className="mt-2 text-sm leading-6 text-white/80">{text}</p>
+      <p className={`${compact ? "mt-1 text-xs leading-5" : "mt-2 text-sm leading-6"} text-white/80`}>{text}</p>
     </div>
   );
 }
