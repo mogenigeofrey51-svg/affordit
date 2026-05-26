@@ -1,0 +1,17 @@
+{
+  "name": "Affordit",
+  "short_name": "Affordit",
+  "description": "Lifestyle spending checks against budgets, plans, daily limits, and goals.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05080D",
+  "theme_color": "#05080D",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

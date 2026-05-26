@@ -1,0 +1,9 @@
+services:
+  - type: static
+    name: affordit
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: true
+    envVars:
+      - key: NODE_VERSION
+        value: 24
