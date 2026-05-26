@@ -53,11 +53,11 @@ const fakeBudget = {
 };
 
 const budgetCategories = [
-  { name: "Food & Drinks", spent: 6250, limit: 15000, hasDailyLimit: true, dailyLimit: 2000, activeDays: 20, color: "#ff9f1c" },
-  { name: "Transport", spent: 2400, limit: 8000, hasDailyLimit: true, dailyLimit: 1200, activeDays: 22, color: "#27d17f" },
-  { name: "Shopping", spent: 2812, limit: 10000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#7c3cff" },
-  { name: "Entertainment", spent: 2062, limit: 7000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#5ba7ff" },
-  { name: "Others", spent: 1876, limit: 6000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#f97316" },
+  { name: "Food & Drinks", group: "needs", spent: 6250, limit: 15000, hasDailyLimit: true, dailyLimit: 2000, activeDays: 20, color: "#ff9f1c" },
+  { name: "Transport", group: "needs", spent: 2400, limit: 8000, hasDailyLimit: true, dailyLimit: 1200, activeDays: 22, color: "#27d17f" },
+  { name: "Shopping", group: "wants", spent: 2812, limit: 10000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#7c3cff" },
+  { name: "Entertainment", group: "wants", spent: 2062, limit: 7000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#5ba7ff" },
+  { name: "Others", group: "wants", spent: 1876, limit: 6000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#f97316" },
 ];
 
 const history = [
@@ -102,6 +102,77 @@ function money(value) {
   return `${currency} ${amount.toLocaleString()}`;
 }
 
+function pct(value, total) {
+  return total ? Math.round((Number(value || 0) / Number(total || 1)) * 100) : 0;
+}
+
+function budgetTotals(budgetItems, incomeItems = incomeSources) {
+  const income = incomeItems.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const actual = budgetItems.reduce((sum, item) => sum + Number(item.spent || 0), 0);
+  const planned = budgetItems.reduce((sum, item) => sum + Number(item.limit || 0), 0);
+  const needs = budgetItems.filter((item) => item.group === "needs").reduce((sum, item) => sum + Number(item.limit || 0), 0) + recurringExpenses.filter((item) => ["Housing", "Debt"].includes(item.category)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const wants = budgetItems.filter((item) => item.group === "wants").reduce((sum, item) => sum + Number(item.limit || 0), 0);
+  const savingsBudget = budgetItems.filter((item) => item.group === "savings").reduce((sum, item) => sum + Number(item.limit || 0), 0) + fakeBudget.plannedUpcoming;
+  const savings = Math.max(savingsBudget, income - needs - wants);
+  const remaining = planned - actual;
+
+  return { income, actual, planned, needs, wants, savings, remaining };
+}
+
+function budgetHealth(budgetItems, incomeItems = incomeSources) {
+  const totals = budgetTotals(budgetItems, incomeItems);
+  const rules = [
+    { key: "needs", label: "Needs", target: 50, value: pct(totals.needs, totals.income), amount: totals.needs, color: "#27D17F" },
+    { key: "savings", label: "Savings", target: 20, value: pct(totals.savings, totals.income), amount: totals.savings, color: "#5BA7FF" },
+    { key: "wants", label: "Wants", target: 30, value: pct(totals.wants, totals.income), amount: totals.wants, color: "#8D3CFF" },
+  ];
+  const score = Math.max(0, Math.round(100 - rules.reduce((sum, rule) => sum + Math.abs(rule.value - rule.target), 0)));
+  const status = score >= 85 ? "Healthy" : score >= 70 ? "Watch" : "Needs work";
+
+  return { ...totals, rules, score, status };
+}
+
+function budgetComparisonRows(budgetItems) {
+  return budgetItems.map((item) => {
+    const spent = Number(item.spent || 0);
+    const limit = Number(item.limit || 0);
+    const remaining = limit - spent;
+    const used = pct(spent, limit);
+    const status = remaining < 0 ? "Over" : used >= 85 ? "Close" : "On track";
+
+    return { ...item, spent, limit, remaining, used, status };
+  });
+}
+
+function generateBudgetInsights(budgetItems, incomeItems = incomeSources) {
+  const health = budgetHealth(budgetItems, incomeItems);
+  const rows = budgetComparisonRows(budgetItems);
+  const over = rows.filter((row) => row.remaining < 0);
+  const close = rows.filter((row) => row.remaining >= 0 && row.used >= 85);
+  const highest = rows.slice().sort((a, b) => b.used - a.used)[0];
+  const insights = [];
+
+  if (health.rules.find((rule) => rule.key === "needs").value > 50) {
+    insights.push("Needs are above the 50% target. Keep essentials tight before approving lifestyle spends.");
+  }
+  if (health.rules.find((rule) => rule.key === "wants").value > 30) {
+    insights.push("Wants are running hot. Affordit should be stricter on outfits, events, and entertainment until payday.");
+  }
+  if (health.rules.find((rule) => rule.key === "savings").value < 20) {
+    insights.push("Savings/plans are below 20%. Push extra money toward plans before increasing flexible categories.");
+  }
+  if (over.length) {
+    insights.push(`${over[0].name} is over budget by ${money(Math.abs(over[0].remaining))}. New asks in this category should be held or reduced.`);
+  } else if (close.length) {
+    insights.push(`${close[0].name} is close to its limit at ${close[0].used}%. Smaller choices here will protect the month.`);
+  } else if (highest) {
+    insights.push(`${highest.name} has the highest usage at ${highest.used}%. Watch it before weekend spending starts.`);
+  }
+  insights.push(`Budget health is ${health.status.toLowerCase()} at ${health.score}/100 based on the 50/20/30 rule and actual spending.`);
+
+  return insights.slice(0, 4);
+}
+
 function Button({ children, className = "", variant = "primary", ...props }) {
   const styles =
     variant === "secondary"
@@ -135,8 +206,8 @@ function BottomNav({ screen, setScreen }) {
   const tabs = [
     { id: "dashboard", label: "Home", icon: Home },
     { id: "ask", label: "Ask", icon: ShoppingBag },
+    { id: "budget", label: "Budget", icon: PiggyBank },
     { id: "expenses", label: "Spend", icon: CreditCard },
-    { id: "planned", label: "Plans", icon: CalendarDays },
     { id: "history", label: "History", icon: History },
   ];
 
@@ -353,6 +424,8 @@ function Dashboard({ setScreen, incomeItems, expenseItems, budgetItems }) {
   const totalSpent = expenseItems.reduce((sum, item) => sum + Number(item.amount || 0), 0);
   const planned = fakeBudget.plannedUpcoming;
   const left = Math.max(0, totalIncome - totalSpent - planned);
+  const health = budgetHealth(budgetItems, incomeItems);
+  const insights = generateBudgetInsights(budgetItems, incomeItems);
 
   return (
     <PageScroll>
@@ -383,7 +456,26 @@ function Dashboard({ setScreen, incomeItems, expenseItems, budgetItems }) {
         <StatCard label="Left" value={money(left)} />
       </div>
 
-      <SectionHeader title="Budgets" action="See all" onClick={() => setScreen("expenses")} />
+      <SectionHeader title="Budget health" action="Open budget" onClick={() => setScreen("budget")} />
+      <div className="mx-5 rounded-2xl bg-[#101723] p-4 ring-1 ring-white/10">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-white/50">50/20/30 score</p>
+            <p className="mt-1 text-2xl font-black">{health.score}/100</p>
+          </div>
+          <span className={`rounded-full px-3 py-1 text-xs font-black ${health.status === "Healthy" ? "bg-[#54F28A] text-[#06110D]" : health.status === "Watch" ? "bg-[#FFCE3D] text-black" : "bg-[#FF4D6D] text-white"}`}>
+            {health.status}
+          </span>
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {health.rules.map((rule) => (
+            <RuleMini key={rule.key} rule={rule} />
+          ))}
+        </div>
+        <p className="mt-4 rounded-xl bg-black/25 p-3 text-xs leading-5 text-white/70">{insights[0]}</p>
+      </div>
+
+      <SectionHeader title="Actual vs budget" action="See all" onClick={() => setScreen("budget")} />
       <div className="space-y-3 px-5">
         {budgetItems.slice(0, 4).map((budget) => (
           <BudgetStrip key={budget.name} budget={budget} />
@@ -402,6 +494,22 @@ function SectionHeader({ title, action, onClick }) {
           {action}
         </button>
       )}
+    </div>
+  );
+}
+
+function RuleMini({ rule }) {
+  const delta = rule.value - rule.target;
+  const okay = Math.abs(delta) <= 5;
+
+  return (
+    <div className="rounded-xl bg-black/25 p-3 ring-1 ring-white/5">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-[11px] font-bold text-white/55">{rule.label}</p>
+        <p className={`text-[11px] font-black ${okay ? "text-[#54F28A]" : "text-[#FFCE3D]"}`}>{rule.target}%</p>
+      </div>
+      <p className="text-lg font-black">{rule.value}%</p>
+      <Progress value={Math.min(100, rule.value)} color={rule.color} />
     </div>
   );
 }
@@ -433,6 +541,10 @@ function Ask({ setScreen, setPurchase, budgetItems }) {
   const [amount, setAmount] = useState("2800");
   const [item, setItem] = useState("Friday dinner");
   const [category, setCategory] = useState("Food & Drinks");
+  const selectedBudget = budgetItems.find((budget) => budget.name === category);
+  const askAmount = Number(amount || 0);
+  const categoryRemaining = selectedBudget ? Number(selectedBudget.limit || 0) - Number(selectedBudget.spent || 0) : 0;
+  const afterAskRemaining = categoryRemaining - askAmount;
 
   function chooseScenario(scenario) {
     setItem(scenario.item);
@@ -506,6 +618,25 @@ function Ask({ setScreen, setPurchase, budgetItems }) {
           </select>
         </div>
 
+        {selectedBudget && (
+          <div className="rounded-2xl bg-[#101723] p-4 ring-1 ring-white/10">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold text-white/50">Budget check</p>
+                <p className="mt-1 text-sm font-black">{selectedBudget.name}</p>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-xs font-black ${afterAskRemaining >= 0 ? "bg-[#54F28A] text-[#06110D]" : "bg-[#FFCE3D] text-black"}`}>
+                {afterAskRemaining >= 0 ? "Within budget" : "Over budget"}
+              </span>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <StatCard label="Left" value={money(categoryRemaining)} tone={categoryRemaining >= 0 ? "good" : "bad"} />
+              <StatCard label="This ask" value={money(askAmount)} tone="purple" />
+              <StatCard label="After" value={money(afterAskRemaining)} tone={afterAskRemaining >= 0 ? "good" : "bad"} />
+            </div>
+          </div>
+        )}
+
         <div>
           <SectionRow title="Popular ideas" action="See all" />
           <div className="mt-3 space-y-2">
@@ -550,9 +681,17 @@ function SectionRow({ title, action }) {
 
 function getVerdict(purchase, budgetItems = budgetCategories) {
   const amount = Number(purchase.amount || 0);
-  const dailyRule = budgetItems.find((budget) => budget.name === purchase.category && budget.hasDailyLimit);
+  const selectedBudget = budgetItems.find((budget) => budget.name === purchase.category);
+  const dailyRule = selectedBudget?.hasDailyLimit ? selectedBudget : null;
+  const categoryRemaining = selectedBudget ? Number(selectedBudget.limit || 0) - Number(selectedBudget.spent || 0) : fakeBudget.safeAfterPlanned;
+  const afterAskRemaining = categoryRemaining - amount;
   const isOverDailyLimit = dailyRule && amount > Number(dailyRule.dailyLimit || 0);
-  const verdict = purchase.verdict || (isOverDailyLimit ? "dailyLimit" : amount <= 4800 ? "go" : amount <= 12000 ? "cheaper" : amount <= 32000 ? "hold" : "skip");
+  const isOverCategoryBudget = selectedBudget && afterAskRemaining < 0;
+  const isOverSafeSpend = amount > fakeBudget.safeAfterPlanned;
+  const verdict = isOverSafeSpend ? "skip" : isOverCategoryBudget ? "hold" : isOverDailyLimit ? "dailyLimit" : amount <= Math.max(4800, categoryRemaining * 0.35) ? "go" : "cheaper";
+  const budgetLine = selectedBudget
+    ? `${selectedBudget.name} has ${money(categoryRemaining)} left before this ask and ${money(afterAskRemaining)} after it.`
+    : "No matching budget category was found, so Affordit is falling back to safe-to-spend.";
   const map = {
     dailyLimit: {
       label: "Hold up",
@@ -564,7 +703,7 @@ function getVerdict(purchase, budgetItems = budgetCategories) {
       action: "Try cheaper",
       secondary: "See options",
       why: dailyRule
-        ? `You've already spent ${money(1250)} today on ${dailyRule.name}. Your daily limit is ${money(dailyRule.dailyLimit)}.`
+        ? `You've already spent ${money(1250)} today on ${dailyRule.name}. Your daily limit is ${money(dailyRule.dailyLimit)}. ${budgetLine}`
         : "This purchase is above today's category pace.",
     },
     go: {
@@ -576,7 +715,7 @@ function getVerdict(purchase, budgetItems = budgetCategories) {
       summary: "This fits your spend room and keeps your plans moving.",
       action: "Mark bought",
       secondary: "Check another",
-      why: "Your safe-to-spend amount still has room after this purchase.",
+      why: `${budgetLine} Your safe-to-spend amount still has room after this purchase.`,
     },
     hold: {
       label: "Hold up",
@@ -584,10 +723,10 @@ function getVerdict(purchase, budgetItems = budgetCategories) {
       score: 48,
       icon: Clock,
       color: "#FFCE3D",
-      summary: "You can afford this, but it squeezes money already reserved for upcoming plans.",
+      summary: "You can afford this, but it squeezes the category budget or money already reserved for upcoming plans.",
       action: "Remind me",
       secondary: "Buy anyway",
-      why: "Waiting until payday keeps the Mombasa plan and emergency fund more comfortable.",
+      why: `${budgetLine} Waiting until payday keeps the Mombasa plan and emergency fund more comfortable.`,
     },
     cheaper: {
       label: "Try cheaper",
@@ -598,7 +737,7 @@ function getVerdict(purchase, budgetItems = budgetCategories) {
       summary: "A cheaper option gets the same lifestyle win without stressing your budget.",
       action: "Try cheaper",
       secondary: "Original",
-      why: "Look for an option around KES 5,000 and keep the rest for plans.",
+      why: `${budgetLine} Look for a lower option and keep the rest for plans.`,
     },
     skip: {
       label: "Skip it",
@@ -676,6 +815,174 @@ function Result({ setScreen, purchase, budgetItems }) {
   );
 }
 
+function BudgetScreen({ budgetItems, setBudgetItems, incomeItems }) {
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [limit, setLimit] = useState("");
+  const [group, setGroup] = useState("wants");
+  const [dailyLimit, setDailyLimit] = useState("");
+  const health = budgetHealth(budgetItems, incomeItems);
+  const rows = budgetComparisonRows(budgetItems);
+  const insights = generateBudgetInsights(budgetItems, incomeItems);
+
+  function updateBudget(categoryName, field, value) {
+    setBudgetItems(
+      budgetItems.map((budget) =>
+        budget.name === categoryName
+          ? {
+              ...budget,
+              [field]: field === "limit" || field === "dailyLimit" ? Number(value || 0) : value,
+              hasDailyLimit: field === "dailyLimit" ? Number(value || 0) > 0 : budget.hasDailyLimit,
+            }
+          : budget,
+      ),
+    );
+  }
+
+  function addBudget() {
+    const cleanLimit = Number(limit);
+    if (!name || !cleanLimit) return;
+
+    setBudgetItems([
+      {
+        name,
+        group,
+        spent: 0,
+        limit: cleanLimit,
+        hasDailyLimit: Number(dailyLimit || 0) > 0,
+        dailyLimit: Number(dailyLimit || 0),
+        activeDays: Number(dailyLimit || 0) > 0 ? 30 : 0,
+        color: group === "needs" ? "#27D17F" : group === "savings" ? "#5BA7FF" : "#8D3CFF",
+      },
+      ...budgetItems,
+    ]);
+    setName("");
+    setLimit("");
+    setDailyLimit("");
+    setGroup("wants");
+    setShowForm(false);
+  }
+
+  return (
+    <PageScroll>
+      <ScreenHeader title="Budget" subtitle="Health, limits, and AI insights" rightIcon={Plus} onRight={() => setShowForm(!showForm)} />
+
+      <div className="mx-5 mt-5 rounded-2xl bg-[#101723] p-5 ring-1 ring-white/10">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">50/20/30 health</p>
+            <p className="mt-2 text-4xl font-black">{health.score}/100</p>
+            <p className="mt-1 text-sm text-white/55">{health.status} budget structure</p>
+          </div>
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[#8D3CFF]/20 text-[#C39BFF] ring-1 ring-[#8D3CFF]/25">
+            <BarChart3 size={30} />
+          </div>
+        </div>
+        <div className="mt-5 space-y-3">
+          {health.rules.map((rule) => (
+            <BudgetRuleCard key={rule.key} rule={rule} />
+          ))}
+        </div>
+      </div>
+
+      {showForm && (
+        <div className="mx-5 mt-4 rounded-2xl bg-[#101723] p-4 ring-1 ring-white/10">
+          <p className="mb-3 text-sm font-black">Add budget category</p>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Category name" className="mb-3 h-11 w-full rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]" />
+          <div className="mb-3 grid grid-cols-2 gap-3">
+            <input value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="Monthly limit" className="h-11 rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]" />
+            <input value={dailyLimit} onChange={(e) => setDailyLimit(e.target.value)} placeholder="Daily limit" className="h-11 rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]" />
+          </div>
+          <select value={group} onChange={(e) => setGroup(e.target.value)} className="mb-3 h-11 w-full rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]">
+            <option value="needs">Needs - 50%</option>
+            <option value="savings">Savings/plans - 20%</option>
+            <option value="wants">Wants - 30%</option>
+          </select>
+          <Button onClick={addBudget} className="h-11 w-full">
+            Save budget
+          </Button>
+        </div>
+      )}
+
+      <SectionHeader title="Actual vs budget" />
+      <div className="space-y-3 px-5">
+        {rows.map((row) => (
+          <BudgetComparisonCard key={row.name} row={row} updateBudget={updateBudget} />
+        ))}
+      </div>
+
+      <SectionHeader title="Affordit AI insights" />
+      <div className="space-y-3 px-5">
+        {insights.map((insight) => (
+          <InsightCard key={insight} text={insight} />
+        ))}
+      </div>
+    </PageScroll>
+  );
+}
+
+function BudgetRuleCard({ rule }) {
+  const delta = rule.value - rule.target;
+  const okay = Math.abs(delta) <= 5;
+
+  return (
+    <div className="rounded-xl bg-black/25 p-4 ring-1 ring-white/5">
+      <div className="mb-2 flex items-center justify-between">
+        <div>
+          <p className="font-black">{rule.label}</p>
+          <p className="text-xs text-white/45">Target {rule.target}% - {money(rule.amount)}</p>
+        </div>
+        <span className={`rounded-full px-3 py-1 text-xs font-black ${okay ? "bg-[#54F28A] text-[#06110D]" : "bg-[#FFCE3D] text-black"}`}>
+          {rule.value}%
+        </span>
+      </div>
+      <Progress value={Math.min(100, rule.value)} color={rule.color} />
+      <p className="mt-2 text-xs text-white/45">{delta === 0 ? "Exactly on target." : `${Math.abs(delta)}% ${delta > 0 ? "above" : "below"} target.`}</p>
+    </div>
+  );
+}
+
+function BudgetComparisonCard({ row, updateBudget }) {
+  const statusClass = row.status === "Over" ? "bg-[#FF4D6D] text-white" : row.status === "Close" ? "bg-[#FFCE3D] text-black" : "bg-[#54F28A] text-[#06110D]";
+
+  return (
+    <div className="rounded-2xl bg-[#101723] p-4 ring-1 ring-white/5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-black">{row.name}</p>
+          <p className="mt-1 text-xs text-white/50">{row.group || "wants"} - {money(row.spent)} actual / {money(row.limit)} budget</p>
+        </div>
+        <span className={`rounded-full px-3 py-1 text-xs font-black ${statusClass}`}>{row.status}</span>
+      </div>
+      <div className="mt-3">
+        <Progress value={row.used} color={row.color} />
+      </div>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <StatCard label="Actual" value={money(row.spent)} tone={row.remaining >= 0 ? "neutral" : "bad"} />
+        <StatCard label="Budget" value={money(row.limit)} tone="purple" />
+        <StatCard label={row.remaining >= 0 ? "Left" : "Over"} value={money(Math.abs(row.remaining))} tone={row.remaining >= 0 ? "good" : "bad"} />
+      </div>
+      <div className="mt-3 grid grid-cols-[1fr_110px] gap-2">
+        <select value={row.group || "wants"} onChange={(e) => updateBudget(row.name, "group", e.target.value)} className="h-10 rounded-xl border border-white/10 bg-black/25 px-3 text-xs outline-none focus:border-[#8D3CFF]">
+          <option value="needs">Needs</option>
+          <option value="savings">Savings</option>
+          <option value="wants">Wants</option>
+        </select>
+        <input value={row.limit || ""} onChange={(e) => updateBudget(row.name, "limit", e.target.value)} className="h-10 rounded-xl border border-white/10 bg-black/25 px-3 text-xs outline-none focus:border-[#8D3CFF]" />
+      </div>
+    </div>
+  );
+}
+
+function InsightCard({ text }) {
+  return (
+    <div className="rounded-2xl bg-gradient-to-br from-[#151B2A] to-[#0C1019] p-4 ring-1 ring-[#8D3CFF]/20">
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-[#B36BFF]">Affordit AI</p>
+      <p className="mt-2 text-sm leading-6 text-white/80">{text}</p>
+    </div>
+  );
+}
+
 function Expenses({ expenseItems, setExpenseItems, incomeItems, setIncomeItems, budgetItems, setBudgetItems }) {
   const [mode, setMode] = useState("expense");
   const [showForm, setShowForm] = useState(false);
@@ -692,7 +999,7 @@ function Expenses({ expenseItems, setExpenseItems, incomeItems, setIncomeItems, 
     if (mode === "income") {
       setIncomeItems([{ source: name, category: "Income", amount: cleanAmount, date: "Today" }, ...incomeItems]);
     } else if (mode === "budget") {
-      setBudgetItems([{ name, spent: 0, limit: cleanAmount, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#8D3CFF" }, ...budgetItems]);
+      setBudgetItems([{ name, group: "wants", spent: 0, limit: cleanAmount, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#8D3CFF" }, ...budgetItems]);
     } else {
       setExpenseItems([{ merchant: name, category, amount: cleanAmount, date: "Today" }, ...expenseItems]);
       setBudgetItems(budgetItems.map((budget) => (budget.name === category ? { ...budget, spent: Number(budget.spent || 0) + cleanAmount } : budget)));
@@ -903,6 +1210,7 @@ export default function AfforditPrototype() {
     dashboard: <Dashboard setScreen={setScreen} incomeItems={incomeItems} expenseItems={expenseItems} budgetItems={budgetItems} />,
     ask: <Ask setScreen={setScreen} setPurchase={setPurchase} budgetItems={budgetItems} />,
     result: <Result setScreen={setScreen} purchase={purchase} budgetItems={budgetItems} />,
+    budget: <BudgetScreen budgetItems={budgetItems} setBudgetItems={setBudgetItems} incomeItems={incomeItems} />,
     expenses: (
       <Expenses
         expenseItems={expenseItems}
