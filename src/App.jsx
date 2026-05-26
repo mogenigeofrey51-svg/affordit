@@ -15,11 +15,14 @@ import {
   Home,
   Info,
   Menu,
+  Newspaper,
   PiggyBank,
   Plus,
   Search,
   ShoppingBag,
   Target,
+  TrendingDown,
+  TrendingUp,
   Wallet,
   XCircle,
 } from "lucide-react";
@@ -87,6 +90,28 @@ const incomeSources = [
   { source: "Salary", category: "Main income", amount: 45000, date: "May 25" },
   { source: "Freelance design", category: "Side income", amount: 15000, date: "May 18" },
 ];
+
+const marketBriefing = {
+  updatedAt: "Today, 8:00 AM EAT",
+  headline: "AI briefing: watch liquidity, NSE movers, and fund yields before big spends.",
+  summary:
+    "Markets can change your financial mood even when your budget looks stable. Affordit tracks local market headlines, NSE movers, and fund watch items so spending advice can stay context-aware.",
+  bullets: [
+    "NSE watch: review top gainers and losers before making investment-linked spending decisions.",
+    "Mansa X watch: compare yields, fees, liquidity, and withdrawal timing before treating returns as spendable cash.",
+    "Budget link: if markets are volatile, Affordit should protect emergency funds and tighten discretionary approvals.",
+  ],
+  movers: [
+    { symbol: "NSE Gainer A", name: "Top mover placeholder", change: "+6.2%", tone: "up" },
+    { symbol: "NSE Gainer B", name: "Banking watchlist", change: "+4.1%", tone: "up" },
+    { symbol: "NSE Loser A", name: "Profit taking watch", change: "-3.4%", tone: "down" },
+  ],
+  funds: [
+    { name: "Mansa X", note: "Check latest factsheet, yield, fees, liquidity window, and risk notes before using gains in a budget." },
+    { name: "Money market funds", note: "Good for near-term goals only if withdrawal timing matches upcoming plans." },
+    { name: "Emergency fund", note: "Keep this separate from lifestyle spending, even when markets are green." },
+  ],
+};
 
 const categoryOptions = [
   { name: "Outfits", icon: ShoppingBag },
@@ -254,7 +279,7 @@ function BottomNav({ screen, setScreen }) {
     { id: "ask", label: "Ask", icon: ShoppingBag },
     { id: "budget", label: "Budget", icon: PiggyBank },
     { id: "expenses", label: "Spend", icon: CreditCard },
-    { id: "history", label: "History", icon: History },
+    { id: "news", label: "News", icon: Newspaper },
   ];
 
   return (
@@ -525,6 +550,20 @@ function Dashboard({ setScreen, incomeItems, expenseItems, budgetItems }) {
         {insights.slice(0, 3).map((insight) => (
           <InsightCard key={insight} text={insight} compact />
         ))}
+      </div>
+
+      <SectionHeader title="Daily money briefing" action="Open news" onClick={() => setScreen("news")} />
+      <div className="mx-5 rounded-2xl bg-gradient-to-br from-[#151B2A] to-[#0C1019] p-4 ring-1 ring-[#8D3CFF]/20">
+        <div className="flex items-start gap-3">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#8D3CFF]/20 text-[#C39BFF] ring-1 ring-[#8D3CFF]/25">
+            <Newspaper size={22} />
+          </div>
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#B36BFF]">Today</p>
+            <p className="mt-1 text-sm font-black leading-5">{marketBriefing.headline}</p>
+            <p className="mt-2 text-xs leading-5 text-white/55">{marketBriefing.updatedAt} - demo briefing data</p>
+          </div>
+        </div>
       </div>
 
       <SectionHeader title="Actual vs budget" action="See all" onClick={() => setScreen("budget")} />
@@ -1207,6 +1246,112 @@ function PlannedExpenses() {
   );
 }
 
+function NewsScreen({ budgetItems, incomeItems }) {
+  const health = budgetHealth(budgetItems, incomeItems);
+  const insights = generateBudgetInsights(budgetItems, incomeItems);
+
+  return (
+    <PageScroll>
+      <ScreenHeader title="Briefing" subtitle="Financial news and market context" rightIcon={Newspaper} />
+
+      <div className="mx-5 mt-5 overflow-hidden rounded-2xl bg-[#101723] ring-1 ring-white/10">
+        <div className="relative p-5">
+          <ImageTile className="absolute inset-0 opacity-20" position="center top" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#101723] via-[#101723]/95 to-[#101723]/70" />
+          <div className="relative">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#B36BFF]">AI daily briefing</p>
+                <h2 className="mt-2 text-2xl font-black leading-tight">{marketBriefing.headline}</h2>
+              </div>
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-black/30 text-[#C39BFF] ring-1 ring-white/10">
+                <Newspaper size={24} />
+              </span>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-white/75">{marketBriefing.summary}</p>
+            <p className="mt-3 text-xs font-semibold text-white/45">{marketBriefing.updatedAt} - demo market briefing</p>
+          </div>
+        </div>
+      </div>
+
+      <SectionHeader title="What matters today" />
+      <div className="space-y-3 px-5">
+        {marketBriefing.bullets.map((item) => (
+          <InsightCard key={item} text={item} compact />
+        ))}
+      </div>
+
+      <SectionHeader title="NSE movers watch" action="Demo data" />
+      <div className="space-y-3 px-5">
+        {marketBriefing.movers.map((mover) => (
+          <MarketMoverCard key={mover.symbol} mover={mover} />
+        ))}
+      </div>
+
+      <SectionHeader title="Mansa X & fund watch" />
+      <div className="space-y-3 px-5">
+        {marketBriefing.funds.map((fund) => (
+          <FundWatchCard key={fund.name} fund={fund} />
+        ))}
+      </div>
+
+      <SectionHeader title="Budget impact" />
+      <div className="space-y-3 px-5">
+        <div className="rounded-2xl bg-[#101723] p-4 ring-1 ring-white/5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-white/50">Budget health</p>
+              <p className="mt-1 text-2xl font-black">{health.score}/100</p>
+            </div>
+            <span className={`rounded-full px-3 py-1 text-xs font-black ${health.status === "Healthy" ? "bg-[#54F28A] text-[#06110D]" : health.status === "Watch" ? "bg-[#FFCE3D] text-black" : "bg-[#FF4D6D] text-white"}`}>
+              {health.status}
+            </span>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-white/65">{insights[0]}</p>
+        </div>
+        <InsightCard
+          compact
+          text="Production version: this section should pull live NSE data, fund factsheets, and trusted financial headlines every morning, then generate a fresh AI brief from a backend."
+        />
+      </div>
+    </PageScroll>
+  );
+}
+
+function MarketMoverCard({ mover }) {
+  const up = mover.tone === "up";
+  const Icon = up ? TrendingUp : TrendingDown;
+
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-[#101723] p-4 ring-1 ring-white/5">
+      <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${up ? "bg-[#1E9E55]/20 text-[#54F28A]" : "bg-[#FF4D6D]/20 text-[#FF6B7D]"}`}>
+        <Icon size={21} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="font-black">{mover.symbol}</p>
+        <p className="text-xs text-white/45">{mover.name}</p>
+      </div>
+      <p className={`text-sm font-black ${up ? "text-[#54F28A]" : "text-[#FF6B7D]"}`}>{mover.change}</p>
+    </div>
+  );
+}
+
+function FundWatchCard({ fund }) {
+  return (
+    <div className="rounded-2xl bg-[#101723] p-4 ring-1 ring-white/5">
+      <div className="flex items-center gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#8D3CFF]/20 text-[#C39BFF]">
+          <PiggyBank size={20} />
+        </div>
+        <div>
+          <p className="font-black">{fund.name}</p>
+          <p className="mt-1 text-sm leading-6 text-white/65">{fund.note}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function HistoryScreen() {
   return (
     <PageScroll>
@@ -1284,6 +1429,7 @@ export default function AfforditPrototype() {
       />
     ),
     planned: <PlannedExpenses />,
+    news: <NewsScreen budgetItems={budgetItems} incomeItems={incomeItems} />,
     history: <HistoryScreen />,
   };
 
