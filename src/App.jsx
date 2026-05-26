@@ -329,6 +329,42 @@ function Progress({ value, color = "#8D3CFF" }) {
   );
 }
 
+function CircleProgress({ value, size = 46, strokeWidth = 4, color = "#2DB89D" }) {
+  const r = (size - strokeWidth * 2) / 2;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference - (Math.min(100, Math.max(0, value)) / 100) * circumference;
+  return (
+    <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+      <circle cx={size / 2} cy={size / 2} r={r} stroke="#DEDAD3" strokeWidth={strokeWidth} fill="none" />
+      <circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function GoalCard({ plan }) {
+  const pct = plan.target ? Math.round((plan.amount / plan.target) * 100) : 0;
+  const configs = {
+    Trip: { emoji: "🏖️", bg: "#BEE4D9" },
+    Goal: { emoji: "📱", bg: "#C5D8F0" },
+    Event: { emoji: "🎂", bg: "#F0DCC5" },
+  };
+  const config = configs[plan.category] || { emoji: "🎯", bg: "#DDD5C8" };
+  return (
+    <div className="relative w-36 flex-shrink-0 rounded-3xl p-4" style={{ background: config.bg, minHeight: 148 }}>
+      <p className="text-xs font-black leading-4 text-gray-700">{plan.name}</p>
+      <div className="mt-3 text-3xl">{config.emoji}</div>
+      <div className="absolute bottom-3 right-3">
+        <div className="relative" style={{ width: 46, height: 46 }}>
+          <CircleProgress value={pct} size={46} strokeWidth={4} />
+          <div className="absolute inset-0 flex items-center justify-center" style={{ fontSize: 9, fontWeight: 900, color: "#374151" }}>
+            {pct}%
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ScreenHeader({ title, subtitle, leftIcon = Menu, rightIcon = Bell, onLeft, onRight }) {
   const Left = leftIcon;
   const Right = rightIcon;
@@ -491,86 +527,97 @@ function Login({ setScreen }) {
 }
 
 function Dashboard({ setScreen, incomeItems, expenseItems, budgetItems }) {
-  const totalIncome = incomeItems.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-  const totalSpent = expenseItems.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-  const planned = fakeBudget.plannedUpcoming;
-  const left = Math.max(0, totalIncome - totalSpent - planned);
-  const health = budgetHealth(budgetItems, incomeItems);
-  const insights = generateBudgetInsights(budgetItems, incomeItems);
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysLeft = daysInMonth - now.getDate();
+  const monthName = now.toLocaleString("default", { month: "long" });
+
+  const totalBills = recurringExpenses.reduce((sum, i) => sum + Number(i.amount || 0), 0);
+  const billsK = Math.round(totalBills / 1000);
+  const goalsK = Math.round(fakeBudget.plannedUpcoming / 1000);
+  const safeToSpend = fakeBudget.safeAfterPlanned;
+
+  const patternInsight =
+    "You eat out 38% more on Fridays. Skip one this month and your Mombasa trip lands a week earlier.";
 
   return (
     <PageScroll>
-      <ScreenHeader title="Hey, Jay" subtitle="Here's your money map." />
+      <div className="text-gray-900" style={{ background: "#F5F0E8", minHeight: "100%" }}>
 
-      <div className="mx-5 mt-5 overflow-hidden rounded-2xl bg-[#101723] ring-1 ring-white/10">
-        <div className="relative p-5">
-          <ImageTile className="absolute inset-0 opacity-20" position="center top" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#101723] via-[#101723]/90 to-transparent" />
-          <div className="relative">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold text-white/55">Available to spend</p>
-              <span className="grid h-8 w-8 place-items-center rounded-xl bg-black/30 text-white/70">
-                <Eye size={15} />
-              </span>
+        {/* Header */}
+        <div className="flex items-start justify-between px-5 pt-7 pb-2">
+          <div>
+            <p className="text-[10px] font-black tracking-[0.22em] text-gray-400">HUJAMBO</p>
+            <h1 className="mt-0.5 text-2xl font-black tracking-tight">Wanjiku 👋</h1>
+          </div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-black text-white text-sm" style={{ background: "#F4A5A5" }}>
+            W
+          </div>
+        </div>
+
+        {/* Safe to spend */}
+        <div className="px-5 pt-5 pb-4">
+          <p className="text-[10px] font-black tracking-[0.22em] text-gray-400">SAFE TO SPEND TODAY</p>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-xl font-black text-gray-400">Ksh</span>
+            <span className="text-5xl font-black">{safeToSpend.toLocaleString()}</span>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-gray-500">
+            After Ksh {billsK}K in bills and Ksh {goalsK}K to goals. {daysLeft} days left in {monthName}.
+          </p>
+        </div>
+
+        {/* Can I afford this? CTA */}
+        <div className="px-5 pb-6">
+          <button
+            onClick={() => setScreen("ask")}
+            className="flex w-full items-center gap-4 rounded-[2rem] p-4"
+            style={{ background: "#2DB89D" }}
+          >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white text-xl" style={{ background: "rgba(255,255,255,0.2)" }}>
+              ✦
             </div>
-            <p className="mt-2 text-2xl font-black">{money(fakeBudget.safeAfterPlanned)}</p>
-            <p className="mt-1 text-xs text-white/55">This month</p>
+            <div className="flex-1 text-left">
+              <p className="font-black text-white">Can I afford this?</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>Ask before you tap pay</p>
+            </div>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white">
+              <ArrowRight size={18} style={{ color: "#2DB89D" }} />
+            </div>
+          </button>
+        </div>
+
+        {/* Goals */}
+        <div>
+          <div className="mb-3 flex items-center justify-between px-5">
+            <p className="text-[10px] font-black tracking-[0.22em] text-gray-400">GOALS</p>
+            <button onClick={() => setScreen("planned")} className="text-[10px] font-black" style={{ color: "#2DB89D" }}>
+              SEE ALL
+            </button>
+          </div>
+          <div className="flex gap-3 overflow-x-auto px-5 pb-3" style={{ scrollbarWidth: "none" }}>
+            {plannedExpenses.map((plan) => (
+              <GoalCard key={plan.name} plan={plan} />
+            ))}
           </div>
         </div>
-      </div>
 
-      <SectionHeader title="Quick overview" action="See all" />
-      <div className="grid grid-cols-2 gap-2 px-5">
-        <StatCard label="Income" value={money(totalIncome)} tone="good" />
-        <StatCard label="Spent" value={money(totalSpent)} tone="bad" />
-        <StatCard label="Planned" value={money(planned)} tone="purple" />
-        <StatCard label="Left" value={money(left)} />
-      </div>
-
-      <SectionHeader title="Budget health" action="Open budget" onClick={() => setScreen("budget")} />
-      <div className="mx-5 rounded-2xl bg-[#101723] p-4 ring-1 ring-white/10">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-white/50">50/20/30 score</p>
-            <p className="mt-1 text-2xl font-black">{health.score}/100</p>
-          </div>
-          <span className={`rounded-full px-3 py-1 text-xs font-black ${health.status === "Healthy" ? "bg-[#54F28A] text-[#06110D]" : health.status === "Watch" ? "bg-[#FFCE3D] text-black" : "bg-[#FF4D6D] text-white"}`}>
-            {health.status}
-          </span>
-        </div>
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {health.rules.map((rule) => (
-            <RuleMini key={rule.key} rule={rule} />
-          ))}
-        </div>
-      </div>
-
-      <SectionHeader title="Affordit AI insights" action="View budget" onClick={() => setScreen("budget")} />
-      <div className="space-y-3 px-5">
-        {insights.slice(0, 3).map((insight) => (
-          <InsightCard key={insight} text={insight} compact />
-        ))}
-      </div>
-
-      <SectionHeader title="Daily money briefing" action="Open news" onClick={() => setScreen("news")} />
-      <div className="mx-5 rounded-2xl bg-gradient-to-br from-[#151B2A] to-[#0C1019] p-4 ring-1 ring-[#8D3CFF]/20">
-        <div className="flex items-start gap-3">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#8D3CFF]/20 text-[#C39BFF] ring-1 ring-[#8D3CFF]/25">
-            <Newspaper size={22} />
-          </div>
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#B36BFF]">Today</p>
-            <p className="mt-1 text-sm font-black leading-5">{marketBriefing.headline}</p>
-            <p className="mt-2 text-xs leading-5 text-white/55">{marketBriefing.updatedAt} - demo briefing data</p>
+        {/* Pattern */}
+        <div className="mt-4 px-5 pb-8">
+          <p className="mb-3 text-[10px] font-black tracking-[0.22em] text-gray-400">PATTERN</p>
+          <div className="flex gap-3 rounded-3xl p-4" style={{ background: "#FDE8E4" }}>
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white">
+              <TrendingUp size={20} style={{ color: "#F4826A" }} />
+            </div>
+            <div>
+              <p className="mb-1.5 text-[10px] font-black tracking-[0.18em]" style={{ color: "#E05A40" }}>
+                PATTERN NOTICED
+              </p>
+              <p className="text-sm leading-5 text-gray-800">{patternInsight}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <SectionHeader title="Actual vs budget" action="See all" onClick={() => setScreen("budget")} />
-      <div className="space-y-3 px-5">
-        {budgetItems.slice(0, 4).map((budget) => (
-          <BudgetStrip key={budget.name} budget={budget} />
-        ))}
       </div>
     </PageScroll>
   );
