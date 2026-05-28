@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
@@ -28,7 +28,6 @@ import {
 } from "lucide-react";
 
 const currency = "KES";
-const HERO_BACKGROUND = "/affordit-theme.png";
 
 const recurringExpenses = [
   { name: "Rent", category: "Housing", amount: 35000, frequency: "Monthly", nextDate: "June 1" },
@@ -56,11 +55,11 @@ const fakeBudget = {
 };
 
 const budgetCategories = [
-  { name: "Food & Drinks", group: "needs", spent: 6250, limit: 15000, hasDailyLimit: true, dailyLimit: 2000, activeDays: 20, color: "#ff9f1c" },
-  { name: "Transport", group: "needs", spent: 2400, limit: 8000, hasDailyLimit: true, dailyLimit: 1200, activeDays: 22, color: "#27d17f" },
-  { name: "Shopping", group: "wants", spent: 2812, limit: 10000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#7c3cff" },
-  { name: "Entertainment", group: "wants", spent: 2062, limit: 7000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#5ba7ff" },
-  { name: "Others", group: "wants", spent: 1876, limit: 6000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#f97316" },
+  { name: "Food & Drinks", group: "needs", spent: 6250, limit: 15000, hasDailyLimit: true, dailyLimit: 2000, activeDays: 20, color: "#FFB23E" },
+  { name: "Transport", group: "needs", spent: 2400, limit: 8000, hasDailyLimit: true, dailyLimit: 1200, activeDays: 22, color: "#2FD08A" },
+  { name: "Shopping", group: "wants", spent: 2812, limit: 10000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#7C5CFC" },
+  { name: "Entertainment", group: "wants", spent: 2062, limit: 7000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#5BA7FF" },
+  { name: "Others", group: "wants", spent: 1876, limit: 6000, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#9AA3B2" },
 ];
 
 const history = [
@@ -140,20 +139,18 @@ function budgetTotals(budgetItems, incomeItems = incomeSources) {
   const savingsBudget = budgetItems.filter((item) => item.group === "savings").reduce((sum, item) => sum + Number(item.limit || 0), 0) + fakeBudget.plannedUpcoming;
   const savings = Math.max(savingsBudget, income - needs - wants);
   const remaining = planned - actual;
-
   return { income, actual, planned, needs, wants, savings, remaining };
 }
 
 function budgetHealth(budgetItems, incomeItems = incomeSources) {
   const totals = budgetTotals(budgetItems, incomeItems);
   const rules = [
-    { key: "needs", label: "Needs", target: 50, value: pct(totals.needs, totals.income), amount: totals.needs, color: "#27D17F" },
-    { key: "savings", label: "Savings", target: 20, value: pct(totals.savings, totals.income), amount: totals.savings, color: "#5BA7FF" },
-    { key: "wants", label: "Wants", target: 30, value: pct(totals.wants, totals.income), amount: totals.wants, color: "#8D3CFF" },
+    { key: "needs", label: "Needs", target: 50, value: pct(totals.needs, totals.income), amount: totals.needs, color: "#2FD08A" },
+    { key: "savings", label: "Savings", target: 20, value: pct(totals.savings, totals.income), amount: totals.savings, color: "#7C5CFC" },
+    { key: "wants", label: "Wants", target: 30, value: pct(totals.wants, totals.income), amount: totals.wants, color: "#5BA7FF" },
   ];
   const score = Math.max(0, Math.round(100 - rules.reduce((sum, rule) => sum + Math.abs(rule.value - rule.target), 0)));
   const status = score >= 85 ? "Healthy" : score >= 70 ? "Watch" : "Needs work";
-
   return { ...totals, rules, score, status };
 }
 
@@ -164,7 +161,6 @@ function budgetComparisonRows(budgetItems) {
     const remaining = limit - spent;
     const used = pct(spent, limit);
     const status = remaining < 0 ? "Over" : used >= 85 ? "Close" : "On track";
-
     return { ...item, spent, limit, remaining, used, status };
   });
 }
@@ -181,20 +177,19 @@ function generateBudgetInsights(budgetItems, incomeItems = incomeSources) {
     insights.push("Needs are above the 50% target. Keep essentials tight before approving lifestyle spends.");
   }
   if (health.rules.find((rule) => rule.key === "wants").value > 30) {
-    insights.push("Wants are running hot. Affordit should be stricter on outfits, events, and entertainment until payday.");
+    insights.push("Wants are running hot. Be stricter on outfits, events, and entertainment until payday.");
   }
   if (health.rules.find((rule) => rule.key === "savings").value < 20) {
-    insights.push("Savings/plans are below 20%. Push extra money toward plans before increasing flexible categories.");
+    insights.push("Savings are below 20%. Push extra money toward plans before increasing flexible categories.");
   }
   if (over.length) {
-    insights.push(`${over[0].name} is over budget by ${money(Math.abs(over[0].remaining))}. New asks in this category should be held or reduced.`);
+    insights.push(`${over[0].name} is over budget by ${money(Math.abs(over[0].remaining))}. New asks here should be held or reduced.`);
   } else if (close.length) {
     insights.push(`${close[0].name} is close to its limit at ${close[0].used}%. Smaller choices here will protect the month.`);
   } else if (highest) {
     insights.push(`${highest.name} has the highest usage at ${highest.used}%. Watch it before weekend spending starts.`);
   }
-  insights.push(`Budget health is ${health.status.toLowerCase()} at ${health.score}/100 based on the 50/20/30 rule and actual spending.`);
-
+  insights.push(`Budget health is ${health.status.toLowerCase()} at ${health.score}/100 based on the 50/20/30 rule.`);
   return insights.slice(0, 4);
 }
 
@@ -206,7 +201,7 @@ function generateAskInsights({ amount, category }, budgetItems) {
   if (!selectedBudget) {
     return [
       "Choose a budget category so Affordit can compare this spend against your actual monthly limit.",
-      `This ask is ${money(askAmount)}. Affordit is currently using safe-to-spend as the fallback check.`,
+      `This ask is ${money(askAmount)}. Affordit is using safe-to-spend as the fallback check.`,
     ];
   }
 
@@ -218,58 +213,92 @@ function generateAskInsights({ amount, category }, budgetItems) {
   const dailyLimit = Number(selectedBudget.dailyLimit || 0);
 
   if (afterAsk < 0) {
-    insights.push(`${selectedBudget.name} will go over budget by ${money(Math.abs(afterAsk))}. Affordit should suggest a cheaper option or a delay.`);
+    insights.push(`This pushes ${selectedBudget.name} over budget by ${money(Math.abs(afterAsk))}. Consider a cheaper option or waiting.`);
   } else {
-    insights.push(`${selectedBudget.name} has ${money(remaining)} left. After this ask, you would still have ${money(afterAsk)} left.`);
+    insights.push(`${selectedBudget.name} has ${money(remaining)} left. After this, you'd still have ${money(afterAsk)} — you're good.`);
   }
 
   if (selectedBudget.hasDailyLimit && askAmount > dailyLimit) {
-    insights.push(`This is above your daily ${selectedBudget.name.toLowerCase()} limit of ${money(dailyLimit)}. The monthly budget may still look okay, but daily pacing says slow down.`);
+    const tomorrowSafe = fakeBudget.safeAfterPlanned - askAmount;
+    insights.push(`Tomorrow's safe number drops to KES ${Math.max(0, tomorrowSafe).toLocaleString()} if you go ahead — above your daily ${selectedBudget.name.toLowerCase()} limit of ${money(dailyLimit)}.`);
   }
 
   if (usedAfterAsk >= 90) {
-    insights.push(`This would push ${selectedBudget.name} to ${usedAfterAsk}% used. Future asks in this category should be stricter this month.`);
+    insights.push(`This would push ${selectedBudget.name} to ${usedAfterAsk}% used. Future asks here should be stricter this month.`);
   } else if (usedAfterAsk >= 70) {
-    insights.push(`This would put ${selectedBudget.name} at ${usedAfterAsk}% used. Still possible, but keep the next few spends smaller.`);
+    insights.push(`This puts ${selectedBudget.name} at ${usedAfterAsk}% used. Still doable — keep the next few spends smaller.`);
   } else {
-    insights.push(`This keeps ${selectedBudget.name} at ${usedAfterAsk}% used, which is still comfortable for the month.`);
+    insights.push(`This keeps ${selectedBudget.name} at ${usedAfterAsk}% used, which is comfortable for the month.`);
   }
 
   if (askAmount > fakeBudget.safeAfterPlanned) {
-    insights.push(`This is higher than your safe-to-spend amount of ${money(fakeBudget.safeAfterPlanned)} after plans and commitments.`);
+    insights.push(`This one bites into payday — it's higher than your safe-to-spend of ${money(fakeBudget.safeAfterPlanned)} after plans and commitments.`);
   } else {
-    insights.push(`This stays within your safe-to-spend amount of ${money(fakeBudget.safeAfterPlanned)} after plans and commitments.`);
+    insights.push(`Stays within your safe-to-spend of ${money(fakeBudget.safeAfterPlanned)} after plans and commitments.`);
   }
 
   return insights.slice(0, 4);
 }
 
+// ─── Design tokens as inline style helpers ─────────────────────────────────
+
 function Button({ children, className = "", variant = "primary", ...props }) {
   const styles =
     variant === "secondary"
-      ? "bg-[#111824] text-white ring-1 ring-white/10 hover:bg-[#182233]"
+      ? "bg-surface-2 text-text ring-1 ring-border hover:bg-[#2A303D]"
       : variant === "ghost"
-        ? "bg-transparent text-white/70 hover:text-white"
-        : "bg-gradient-to-r from-[#8D3CFF] to-[#4E2DE2] text-white shadow-lg shadow-[#5B2AF2]/30 hover:brightness-110";
+        ? "bg-transparent text-muted hover:text-text"
+        : "bg-brand text-white shadow-lg shadow-brand/20 hover:brightness-110 active:scale-95";
 
   return (
-    <button className={`inline-flex items-center justify-center rounded-2xl px-4 font-black transition ${styles} ${className}`} {...props}>
+    <button className={`inline-flex items-center justify-center rounded-btn px-5 font-bold transition-all duration-150 ${styles} ${className}`} {...props}>
       {children}
     </button>
   );
 }
 
-function AppFrame({ children, nav, screen, setScreen }) {
+function AppShell({ children }) {
   return (
-    <div className="min-h-screen bg-[#020306] text-white sm:flex sm:items-center sm:justify-center sm:p-6">
-      <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col overflow-hidden bg-[#05080D] shadow-2xl shadow-black/70 ring-1 ring-white/15 sm:min-h-[880px] sm:max-h-[920px] sm:rounded-[2rem] sm:border sm:border-white/20">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,60,255,0.18),transparent_38%),radial-gradient(circle_at_bottom_left,rgba(22,104,128,0.22),transparent_42%)]" />
-        <div className="relative flex min-h-0 flex-1 flex-col">
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        background: "radial-gradient(ellipse at 60% 0%, #13111F 0%, #0E1117 60%)",
+      }}
+    >
+      <div
+        className="relative w-full max-w-[440px] mx-auto flex flex-col overflow-hidden bg-bg"
+        style={{
+          minHeight: "100svh",
+          boxShadow: "0 0 0 1px #2C323D, 0 32px 80px rgba(0,0,0,0.6)",
+        }}
+      >
+        {/* Desktop: constrained with rounded corners */}
+        <style>{`
+          @media (min-width: 480px) {
+            .app-shell-inner {
+              min-height: 860px !important;
+              max-height: 920px !important;
+              border-radius: 28px !important;
+              border: 1px solid #2C323D !important;
+            }
+          }
+        `}</style>
+        <div className="app-shell-inner relative flex flex-col flex-1 overflow-hidden" style={{ minHeight: "100svh" }}>
           {children}
-          {nav && <BottomNav screen={screen} setScreen={setScreen} />}
         </div>
       </div>
     </div>
+  );
+}
+
+function AppFrame({ children, nav, screen, setScreen }) {
+  return (
+    <AppShell>
+      <div className="relative flex flex-col flex-1 min-h-0">
+        {children}
+        {nav && <BottomNav screen={screen} setScreen={setScreen} />}
+      </div>
+    </AppShell>
   );
 }
 
@@ -283,21 +312,22 @@ function BottomNav({ screen, setScreen }) {
   ];
 
   return (
-    <nav className="border-t border-white/10 bg-[#05080D]/95 px-4 pb-4 pt-2 backdrop-blur">
+    <nav className="border-t border-border bg-bg/95 px-3 pb-5 pt-2 backdrop-blur-sm">
       <div className="grid grid-cols-5 gap-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = screen === tab.id;
-
           return (
             <button
               key={tab.id}
               onClick={() => setScreen(tab.id)}
-              className={`flex flex-col items-center gap-1 rounded-2xl py-2 text-[10px] font-semibold transition ${
-                active ? "text-[#B36BFF]" : "text-white/55 hover:text-white"
+              className={`flex flex-col items-center gap-1 rounded-xl py-2.5 text-[10px] font-semibold tracking-wide transition-all duration-150 ${
+                active
+                  ? "bg-brand-soft text-brand"
+                  : "text-muted hover:text-text"
               }`}
             >
-              <Icon size={16} strokeWidth={active ? 3 : 2} />
+              <Icon size={18} strokeWidth={active ? 2.5 : 2} />
               {tab.label}
             </button>
           );
@@ -309,55 +339,77 @@ function BottomNav({ screen, setScreen }) {
 
 function IconButton({ icon: Icon, onClick, label, className = "" }) {
   return (
-    <button onClick={onClick} aria-label={label} className={`grid h-10 w-10 place-items-center rounded-2xl bg-black/30 text-white ring-1 ring-white/10 backdrop-blur ${className}`}>
+    <button
+      onClick={onClick}
+      aria-label={label}
+      className={`grid h-10 w-10 place-items-center rounded-xl bg-surface-2 text-muted ring-1 ring-border hover:text-text transition-colors ${className}`}
+    >
       <Icon size={18} />
     </button>
   );
 }
 
-function ImageTile({ className = "", position = "center" }) {
-  return <div className={`bg-cover ${className}`} style={{ backgroundImage: `url(${HERO_BACKGROUND})`, backgroundPosition: position }} />;
+function Label({ children }) {
+  return (
+    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">
+      {children}
+    </p>
+  );
 }
 
-function Progress({ value, color = "#8D3CFF" }) {
-  const safeValue = Math.max(0, Math.min(100, Number(value || 0)));
-
+function Progress({ value, color = "#7C5CFC" }) {
+  const safe = Math.max(0, Math.min(100, Number(value || 0)));
   return (
-    <div className="h-1.5 w-full rounded-full bg-white/10">
-      <div className="h-1.5 rounded-full" style={{ width: `${safeValue}%`, background: color }} />
+    <div className="h-1.5 w-full rounded-full bg-surface-2">
+      <div className="h-1.5 rounded-full transition-all duration-500" style={{ width: `${safe}%`, background: color }} />
     </div>
   );
 }
 
-function CircleProgress({ value, size = 46, strokeWidth = 4, color = "#2DB89D" }) {
+function AnimatedRing({ value, size = 48, strokeWidth = 4, color = "#7C5CFC" }) {
   const r = (size - strokeWidth * 2) / 2;
   const circumference = 2 * Math.PI * r;
   const offset = circumference - (Math.min(100, Math.max(0, value)) / 100) * circumference;
+  const id = `ring-${color.replace("#", "")}`;
+
   return (
     <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-      <circle cx={size / 2} cy={size / 2} r={r} stroke="#DEDAD3" strokeWidth={strokeWidth} fill="none" />
-      <circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+      <circle cx={size / 2} cy={size / 2} r={r} stroke="#2C323D" strokeWidth={strokeWidth} fill="none" />
+      <circle
+        cx={size / 2} cy={size / 2} r={r}
+        stroke={color} strokeWidth={strokeWidth} fill="none"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        style={{
+          transition: "stroke-dashoffset 0.7s ease-out",
+        }}
+      />
     </svg>
   );
 }
 
 function GoalCard({ plan }) {
-  const pct = plan.target ? Math.round((plan.amount / plan.target) * 100) : 0;
+  const progress = plan.target ? Math.round((plan.amount / plan.target) * 100) : 0;
   const configs = {
-    Trip: { emoji: "🏖️", bg: "#BEE4D9" },
-    Goal: { emoji: "📱", bg: "#C5D8F0" },
-    Event: { emoji: "🎂", bg: "#F0DCC5" },
+    Trip: { emoji: "🏖️", accent: "#2FD08A" },
+    Goal: { emoji: "📱", accent: "#7C5CFC" },
+    Event: { emoji: "🎂", accent: "#FFB23E" },
   };
-  const config = configs[plan.category] || { emoji: "🎯", bg: "#DDD5C8" };
+  const config = configs[plan.category] || { emoji: "🎯", accent: "#7C5CFC" };
+
   return (
-    <div className="relative w-36 flex-shrink-0 rounded-3xl p-4" style={{ background: config.bg, minHeight: 148 }}>
-      <p className="text-xs font-black leading-4 text-gray-700">{plan.name}</p>
+    <div
+      className="relative w-36 flex-shrink-0 rounded-card p-4 bg-surface ring-1 ring-border"
+      style={{ minHeight: 152 }}
+    >
+      <p className="text-xs font-bold leading-4 text-text">{plan.name}</p>
       <div className="mt-3 text-3xl">{config.emoji}</div>
       <div className="absolute bottom-3 right-3">
-        <div className="relative" style={{ width: 46, height: 46 }}>
-          <CircleProgress value={pct} size={46} strokeWidth={4} />
-          <div className="absolute inset-0 flex items-center justify-center" style={{ fontSize: 9, fontWeight: 900, color: "#374151" }}>
-            {pct}%
+        <div className="relative" style={{ width: 48, height: 48 }}>
+          <AnimatedRing value={progress} size={48} strokeWidth={4} color={config.accent} />
+          <div className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-text">
+            {progress}%
           </div>
         </div>
       </div>
@@ -368,15 +420,14 @@ function GoalCard({ plan }) {
 function ScreenHeader({ title, subtitle, leftIcon = Menu, rightIcon = Bell, onLeft, onRight }) {
   const Left = leftIcon;
   const Right = rightIcon;
-
   return (
-    <div className="flex items-start justify-between px-5 pt-5">
+    <div className="flex items-start justify-between px-5 pt-6">
       <div>
-        <button onClick={onLeft} className="mb-5 text-white/85">
+        <button onClick={onLeft} className="mb-4 text-muted hover:text-text transition-colors">
           <Left size={22} />
         </button>
-        <h1 className="text-2xl font-black tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-white/70">{subtitle}</p>}
+        <h1 className="font-display text-[22px] font-bold tracking-tight text-text">{title}</h1>
+        {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
       </div>
       <IconButton icon={Right} onClick={onRight} label="Action" />
     </div>
@@ -385,146 +436,201 @@ function ScreenHeader({ title, subtitle, leftIcon = Menu, rightIcon = Bell, onLe
 
 function StatCard({ label, value, tone = "neutral" }) {
   const toneClass = {
-    good: "text-[#54F28A]",
-    bad: "text-[#FF6B3D]",
-    purple: "text-[#B36BFF]",
-    neutral: "text-white",
+    good: "text-safe",
+    bad: "text-over",
+    purple: "text-brand",
+    neutral: "text-text",
   }[tone];
 
   return (
-    <div className="rounded-xl bg-[#101723] p-4 ring-1 ring-white/5">
-      <p className="text-xs font-semibold text-white/55">{label}</p>
-      <p className={`mt-1 text-sm font-black ${toneClass}`}>{value}</p>
+    <div className="rounded-card bg-surface-2 p-3 ring-1 ring-border">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{label}</p>
+      <p className={`mt-1 text-sm font-bold ${toneClass}`}>{value}</p>
     </div>
   );
 }
 
-function Landing({ setScreen }) {
+// ─── Hero Number with count-up ───────────────────────────────────────────────
+
+function HeroNumber({ target, tone = "safe" }) {
+  const [displayed, setDisplayed] = useState(0);
+  const start = useRef(Date.now());
+  const duration = 900;
+
+  useEffect(() => {
+    let raf;
+    function tick() {
+      const elapsed = Date.now() - start.current;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayed(Math.round(eased * target));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target]);
+
+  const colorMap = {
+    safe: "#2FD08A",
+    caution: "#FFB23E",
+    over: "#FF5C5C",
+  };
+  const shadowMap = {
+    safe: "0 0 48px 10px rgba(47,208,138,0.15)",
+    caution: "0 0 48px 10px rgba(255,178,62,0.15)",
+    over: "0 0 48px 10px rgba(255,92,92,0.15)",
+  };
+  const color = colorMap[tone] || colorMap.safe;
+
   return (
-    <AppFrame>
-      <div className="relative min-h-screen overflow-hidden sm:min-h-[880px]">
-        <ImageTile className="absolute inset-0 opacity-95" position="center top" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-[#06111B]/45 to-[#04070C]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/25 to-transparent" />
-
-        <div className="relative z-10 flex min-h-screen flex-col px-6 pb-6 pt-7 sm:min-h-[880px]">
-          <div className="flex items-center justify-between">
-            <p className="text-2xl font-black">Affordit</p>
-            <IconButton icon={Bell} label="Notifications" />
-          </div>
-
-          <div className="mt-auto">
-            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-              <h1 className="max-w-xs text-4xl font-black leading-tight tracking-tight">
-                Check the fit, the trip, the spend.
-              </h1>
-              <p className="mt-3 max-w-[18rem] text-sm leading-6 text-white/85">
-                Affordit is your lifestyle money check before you buy the outfit, book the trip, order the food, or tap pay.
-              </p>
-            </motion.div>
-
-            <div className="mt-6 rounded-2xl bg-[#101723]/90 p-3 shadow-2xl shadow-black/40 ring-1 ring-white/10 backdrop-blur">
-              <MiniDecision title="Weekend outfit" amount={4800} label="Fits your budget" good />
-              <MiniDecision title="Mombasa trip" amount={18500} label="Hold for payday" />
-            </div>
-
-            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-              <Benefit icon={ShieldMark} title="Know before you spend" />
-              <Benefit icon={BarChart3} title="Stay on budget" />
-              <Benefit icon={Target} title="More life, less limits" />
-            </div>
-
-            <Button onClick={() => setScreen("login")} className="mt-5 h-14 w-full">
-              Let's go <ArrowRight className="ml-2" size={18} />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </AppFrame>
-  );
-}
-
-function ShieldMark(props) {
-  return <CheckCircle2 {...props} />;
-}
-
-function MiniDecision({ title, amount, label, good }) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl p-2">
-      <ImageTile className="h-12 w-12 shrink-0 rounded-xl" position={good ? "center 70%" : "center top"} />
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold text-white/85">{title}</p>
-        <p className="font-black">{money(amount)}</p>
-      </div>
-      <span className={`rounded-full px-3 py-1 text-[10px] font-black ${good ? "bg-[#54F28A] text-[#06110D]" : "bg-[#FF9F1C] text-black"}`}>
-        {label}
+    <div className="hero-animate inline-block" style={{ filter: `drop-shadow(${shadowMap[tone]})` }}>
+      <span className="font-display font-bold" style={{ fontSize: 60, lineHeight: 1, color }}>
+        {displayed.toLocaleString()}
       </span>
     </div>
   );
 }
 
-function Benefit({ icon: Icon, title }) {
-  return (
-    <div className="rounded-2xl bg-black/25 px-2 py-3 ring-1 ring-white/10 backdrop-blur">
-      <Icon size={18} className="mx-auto text-[#B36BFF]" />
-      <p className="mt-2 text-[11px] font-semibold leading-4 text-white/80">{title}</p>
-    </div>
-  );
-}
+// ─── Landing ────────────────────────────────────────────────────────────────
 
-function Login({ setScreen }) {
+function Landing({ setScreen }) {
   return (
     <AppFrame>
-      <div className="relative min-h-screen overflow-hidden sm:min-h-[880px]">
-        <ImageTile className="absolute inset-0 opacity-95" position="center top" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-[#070A11]/35 to-[#05080D]" />
+      <div className="relative flex flex-col flex-1 px-6 pb-8 pt-7 overflow-hidden">
+        {/* Background gradient */}
+        <div className="pointer-events-none absolute inset-0" style={{
+          background: "radial-gradient(ellipse at 70% 20%, rgba(124,92,252,0.18) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(47,208,138,0.10) 0%, transparent 50%)",
+        }} />
 
-        <div className="relative z-10 flex min-h-screen flex-col px-6 pb-7 pt-7 sm:min-h-[880px]">
-          <div className="flex items-center justify-between">
-            <p className="text-2xl font-black">Affordit</p>
-            <IconButton icon={ChevronLeft} onClick={() => setScreen("landing")} label="Back" className="rotate-180" />
-          </div>
+        {/* Top bar */}
+        <div className="relative flex items-center justify-between">
+          <span className="font-display text-2xl font-bold text-text">Affordit</span>
+          <IconButton icon={Bell} label="Notifications" />
+        </div>
 
-          <div className="mt-auto">
-            <h1 className="text-3xl font-black">Welcome back</h1>
-            <p className="mt-2 text-sm text-white/75">Spend smarter. Live better.</p>
-
-            <div className="mt-5 space-y-3">
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold text-white/65">Phone number</span>
-                <input
-                  defaultValue="+254 712 345 678"
-                  className="h-12 w-full rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-sm text-white outline-none backdrop-blur placeholder:text-white/35 focus:border-[#8D3CFF]"
-                />
-              </label>
-              <Button onClick={() => setScreen("dashboard")} className="h-12 w-full">
-                Continue
-              </Button>
-            </div>
-
-            <div className="my-6 flex items-center gap-3 text-xs text-white/40">
-              <div className="h-px flex-1 bg-white/10" />
-              or continue with
-              <div className="h-px flex-1 bg-white/10" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="secondary" className="h-12">
-                Google
-              </Button>
-              <Button variant="secondary" className="h-12">
-                Apple
-              </Button>
-            </div>
-            <p className="mt-5 text-center text-sm text-white/70">
-              Don't have an account? <span className="font-bold text-[#B36BFF]">Sign up</span>
+        {/* Main content pushed to bottom */}
+        <div className="relative mt-auto">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+            <h1 className="font-display max-w-xs text-[38px] font-bold leading-tight tracking-tight text-text">
+              Check the fit,<br />the trip, the spend.
+            </h1>
+            <p className="mt-3 max-w-[17rem] text-[15px] leading-6 text-muted">
+              Know if you can afford it before you tap pay — outfits, trips, food, rides, and more.
             </p>
+          </motion.div>
+
+          {/* Mini preview card */}
+          <div className="mt-6 rounded-card bg-surface p-3 ring-1 ring-border shadow-card">
+            <LandingMiniRow title="Weekend outfit" amount={4800} good />
+            <LandingMiniRow title="Mombasa trip" amount={18500} good={false} />
           </div>
+
+          {/* Benefit pills */}
+          <div className="mt-5 grid grid-cols-3 gap-2.5 text-center">
+            {[
+              { icon: CheckCircle2, label: "Know before\nyou spend" },
+              { icon: BarChart3, label: "Stay on\nbudget" },
+              { icon: Target, label: "More life,\nless limits" },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="rounded-xl bg-surface px-2 py-3.5 ring-1 ring-border">
+                <Icon size={18} className="mx-auto text-brand" />
+                <p className="mt-2 whitespace-pre text-[10px] font-semibold leading-4 text-muted">{label}</p>
+              </div>
+            ))}
+          </div>
+
+          <Button onClick={() => setScreen("login")} className="mt-5 h-14 w-full text-[15px]">
+            Twendeni <ArrowRight className="ml-2" size={18} />
+          </Button>
         </div>
       </div>
     </AppFrame>
   );
 }
+
+function LandingMiniRow({ title, amount, good }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl p-2">
+      <div className="h-11 w-11 shrink-0 rounded-xl bg-surface-2 flex items-center justify-center text-lg">
+        {good ? "👗" : "🏖️"}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-semibold text-text">{title}</p>
+        <p className="text-sm font-bold text-text">{money(amount)}</p>
+      </div>
+      <VerdictPill good={good} label={good ? "You're good" : "Hold up"} />
+    </div>
+  );
+}
+
+function VerdictPill({ good, label, tone }) {
+  const t = tone || (good ? "safe" : "caution");
+  const styles = {
+    safe: "bg-safe/15 text-safe ring-safe/20",
+    caution: "bg-caution/15 text-caution ring-caution/20",
+    over: "bg-over/15 text-over ring-over/20",
+    brand: "bg-brand-soft text-brand ring-brand/20",
+  };
+  return (
+    <span className={`chip-pop rounded-full px-3 py-1 text-[11px] font-bold ring-1 ${styles[t] || styles.safe}`}>
+      {label}
+    </span>
+  );
+}
+
+// ─── Login ───────────────────────────────────────────────────────────────────
+
+function Login({ setScreen }) {
+  return (
+    <AppFrame>
+      <div className="relative flex flex-col flex-1 px-6 pb-8 pt-7 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0" style={{
+          background: "radial-gradient(ellipse at 50% 0%, rgba(124,92,252,0.14) 0%, transparent 50%)",
+        }} />
+
+        <div className="relative flex items-center justify-between">
+          <span className="font-display text-2xl font-bold text-text">Affordit</span>
+          <IconButton icon={ChevronLeft} onClick={() => setScreen("landing")} label="Back" />
+        </div>
+
+        <div className="relative mt-auto">
+          <h1 className="font-display text-3xl font-bold text-text">Karibu tena</h1>
+          <p className="mt-2 text-[15px] text-muted">Spend smarter. Live better.</p>
+
+          <div className="mt-6 space-y-3">
+            <label className="block">
+              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Phone number</span>
+              <input
+                defaultValue="+254 712 345 678"
+                className="h-12 w-full rounded-xl border border-border bg-surface-2 px-4 py-3 text-[15px] text-text outline-none placeholder:text-muted focus:border-brand transition-colors"
+              />
+            </label>
+            <Button onClick={() => setScreen("dashboard")} className="h-12 w-full text-[15px]">
+              Continue
+            </Button>
+          </div>
+
+          <div className="my-6 flex items-center gap-3 text-xs text-muted">
+            <div className="h-px flex-1 bg-border" />
+            or continue with
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="secondary" className="h-12">Google</Button>
+            <Button variant="secondary" className="h-12">Apple</Button>
+          </div>
+
+          <p className="mt-5 text-center text-[15px] text-muted">
+            Don't have an account? <span className="font-bold text-brand">Sign up</span>
+          </p>
+        </div>
+      </div>
+    </AppFrame>
+  );
+}
+
+// ─── Dashboard (Home) ────────────────────────────────────────────────────────
 
 function Dashboard({ setScreen, incomeItems, expenseItems, budgetItems }) {
   const now = new Date();
@@ -537,143 +643,98 @@ function Dashboard({ setScreen, incomeItems, expenseItems, budgetItems }) {
   const goalsK = Math.round(fakeBudget.plannedUpcoming / 1000);
   const safeToSpend = fakeBudget.safeAfterPlanned;
 
+  const totalSpent = budgetItems.reduce((sum, i) => sum + Number(i.spent || 0), 0);
+  const totalBudget = budgetItems.reduce((sum, i) => sum + Number(i.limit || 0), 0);
+  const spendPct = pct(totalSpent, totalBudget);
+  const heroTone = safeToSpend <= 0 ? "over" : spendPct >= 80 ? "caution" : "safe";
+
   const patternInsight =
     "You eat out 38% more on Fridays. Skip one this month and your Mombasa trip lands a week earlier.";
 
   return (
     <PageScroll>
-      <div className="text-gray-900" style={{ background: "#F5F0E8", minHeight: "100%" }}>
-
-        {/* Header */}
-        <div className="flex items-start justify-between px-5 pt-7 pb-2">
-          <div>
-            <p className="text-[10px] font-black tracking-[0.22em] text-gray-400">HUJAMBO</p>
-            <h1 className="mt-0.5 text-2xl font-black tracking-tight">Wanjiku 👋</h1>
-          </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-black text-white text-sm" style={{ background: "#F4A5A5" }}>
-            W
-          </div>
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 pt-7 pb-2">
+        <div>
+          <Label>Hujambo</Label>
+          <h1 className="mt-1 font-display text-2xl font-bold text-text">Wanjiku 👋</h1>
         </div>
-
-        {/* Safe to spend */}
-        <div className="px-5 pt-5 pb-4">
-          <p className="text-[10px] font-black tracking-[0.22em] text-gray-400">SAFE TO SPEND TODAY</p>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-xl font-black text-gray-400">Ksh</span>
-            <span className="text-5xl font-black">{safeToSpend.toLocaleString()}</span>
-          </div>
-          <p className="mt-2 text-sm leading-6 text-gray-500">
-            After Ksh {billsK}K in bills and Ksh {goalsK}K to goals. {daysLeft} days left in {monthName}.
-          </p>
+        <div
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold text-white text-sm"
+          style={{ background: "linear-gradient(135deg, #7C5CFC, #2FD08A)" }}
+        >
+          W
         </div>
+      </div>
 
-        {/* Can I afford this? CTA */}
-        <div className="px-5 pb-6">
-          <button
-            onClick={() => setScreen("ask")}
-            className="flex w-full items-center gap-4 rounded-[2rem] p-4"
-            style={{ background: "#2DB89D" }}
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white text-xl" style={{ background: "rgba(255,255,255,0.2)" }}>
-              ✦
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-black text-white">Can I afford this?</p>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>Ask before you tap pay</p>
-            </div>
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white">
-              <ArrowRight size={18} style={{ color: "#2DB89D" }} />
-            </div>
+      {/* Safe to Spend hero */}
+      <div className="px-5 pt-7 pb-5">
+        <Label>Safe to spend today</Label>
+        <div className="mt-4 flex items-baseline gap-2">
+          <span className="text-xl font-semibold text-muted">Ksh</span>
+          <HeroNumber target={safeToSpend} tone={heroTone} />
+        </div>
+        <p className="mt-2.5 text-[14px] leading-6 text-muted">
+          After Ksh {billsK}K in bills and Ksh {goalsK}K to goals. {daysLeft} days left in {monthName}.
+        </p>
+      </div>
+
+      {/* Can I afford this CTA */}
+      <div className="px-5 pb-6">
+        <button
+          onClick={() => setScreen("ask")}
+          className="flex w-full items-center gap-4 rounded-card bg-brand p-4 shadow-lg shadow-brand/25 hover:brightness-110 active:scale-95 transition-all duration-150"
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-white text-xl font-bold">
+            ✦
+          </div>
+          <div className="flex-1 text-left">
+            <p className="font-bold text-white text-[15px]">Can I afford this?</p>
+            <p className="text-[13px] text-white/75">Ask before you tap pay</p>
+          </div>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white">
+            <ArrowRight size={16} className="text-brand" />
+          </div>
+        </button>
+      </div>
+
+      {/* Goals */}
+      <div>
+        <div className="mb-3 flex items-center justify-between px-5">
+          <Label>Goals</Label>
+          <button onClick={() => setScreen("planned")} className="text-[11px] font-bold text-brand uppercase tracking-[0.08em]">
+            See all
           </button>
         </div>
-
-        {/* Goals */}
-        <div>
-          <div className="mb-3 flex items-center justify-between px-5">
-            <p className="text-[10px] font-black tracking-[0.22em] text-gray-400">GOALS</p>
-            <button onClick={() => setScreen("planned")} className="text-[10px] font-black" style={{ color: "#2DB89D" }}>
-              SEE ALL
-            </button>
-          </div>
-          <div className="flex gap-3 overflow-x-auto px-5 pb-3" style={{ scrollbarWidth: "none" }}>
+        <div className="relative">
+          <div className="flex gap-3 overflow-x-auto scrollbar-none px-5 pb-3">
             {plannedExpenses.map((plan) => (
               <GoalCard key={plan.name} plan={plan} />
             ))}
           </div>
+          {/* Gradient fade to signal scroll */}
+          <div className="pointer-events-none absolute right-0 top-0 bottom-3 w-10 bg-gradient-to-l from-bg to-transparent" />
         </div>
+      </div>
 
-        {/* Pattern */}
-        <div className="mt-4 px-5 pb-8">
-          <p className="mb-3 text-[10px] font-black tracking-[0.22em] text-gray-400">PATTERN</p>
-          <div className="flex gap-3 rounded-3xl p-4" style={{ background: "#FDE8E4" }}>
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white">
-              <TrendingUp size={20} style={{ color: "#F4826A" }} />
-            </div>
-            <div>
-              <p className="mb-1.5 text-[10px] font-black tracking-[0.18em]" style={{ color: "#E05A40" }}>
-                PATTERN NOTICED
-              </p>
-              <p className="text-sm leading-5 text-gray-800">{patternInsight}</p>
-            </div>
+      {/* Pattern insight */}
+      <div className="mt-4 px-5 pb-8">
+        <Label>Pattern</Label>
+        <div className="mt-3 flex gap-3 rounded-card bg-surface p-4 ring-1 ring-border">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-caution/10">
+            <TrendingUp size={20} className="text-caution" />
+          </div>
+          <div>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-caution">Pattern noticed</p>
+            <p className="text-[14px] leading-5 text-muted">{patternInsight}</p>
           </div>
         </div>
-
       </div>
     </PageScroll>
   );
 }
 
-function SectionHeader({ title, action, onClick }) {
-  return (
-    <div className="mb-3 mt-6 flex items-center justify-between px-5">
-      <h2 className="text-sm font-black">{title}</h2>
-      {action && (
-        <button onClick={onClick} className="text-xs font-bold text-[#B36BFF]">
-          {action}
-        </button>
-      )}
-    </div>
-  );
-}
-
-function RuleMini({ rule }) {
-  const delta = rule.value - rule.target;
-  const okay = Math.abs(delta) <= 5;
-
-  return (
-    <div className="rounded-xl bg-black/25 p-3 ring-1 ring-white/5">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-[11px] font-bold text-white/55">{rule.label}</p>
-        <p className={`text-[11px] font-black ${okay ? "text-[#54F28A]" : "text-[#FFCE3D]"}`}>{rule.target}%</p>
-      </div>
-      <p className="text-lg font-black">{rule.value}%</p>
-      <Progress value={Math.min(100, rule.value)} color={rule.color} />
-    </div>
-  );
-}
-
-function BudgetStrip({ budget }) {
-  const pct = budget.limit ? Math.round((Number(budget.spent || 0) / Number(budget.limit || 1)) * 100) : 0;
-
-  return (
-    <div className="rounded-xl bg-[#101723] p-3 ring-1 ring-white/5">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <ImageTile className="h-10 w-10 shrink-0 rounded-lg" position="center 70%" />
-          <div className="min-w-0">
-            <p className="text-sm font-bold">{budget.name}</p>
-            <p className="text-[11px] text-white/45">Daily limit: {money(budget.dailyLimit || Math.round(budget.limit / 30))}</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-xs font-black">{money(budget.spent)}</p>
-          <p className="text-[11px] text-white/45">of {money(budget.limit)}</p>
-        </div>
-      </div>
-      <Progress value={pct} color={budget.color || "#8D3CFF"} />
-    </div>
-  );
-}
+// ─── Ask ─────────────────────────────────────────────────────────────────────
 
 function Ask({ setScreen, setPurchase, budgetItems }) {
   const [amount, setAmount] = useState("2800");
@@ -693,80 +754,78 @@ function Ask({ setScreen, setPurchase, budgetItems }) {
     setScreen("result");
   }
 
+  const inputCls = "h-12 w-full rounded-xl border border-border bg-surface-2 px-4 text-[15px] text-text outline-none focus:border-brand transition-colors placeholder:text-muted";
+
   return (
     <PageScroll flush>
-      <div className="relative h-72 overflow-hidden">
-        <ImageTile className="absolute inset-0 opacity-90" position="center top" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/20 to-[#05080D]" />
-        <div className="relative z-10 flex h-full flex-col justify-between px-5 pb-6 pt-5">
-          <div className="flex justify-between">
-            <IconButton icon={ChevronLeft} onClick={() => setScreen("dashboard")} label="Back" />
-            <IconButton icon={Info} label="Info" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight">What's the move?</h1>
-            <p className="mt-2 text-sm text-white/75">Tell us what you're planning to spend on.</p>
-          </div>
+      {/* Top gradient area */}
+      <div className="relative px-5 pb-6 pt-6" style={{
+        background: "linear-gradient(180deg, rgba(124,92,252,0.12) 0%, transparent 100%)",
+      }}>
+        <div className="flex justify-between mb-6">
+          <IconButton icon={ChevronLeft} onClick={() => setScreen("dashboard")} label="Back" />
+          <IconButton icon={Info} label="Info" />
         </div>
+        <h1 className="font-display text-[28px] font-bold tracking-tight text-text">What's the move?</h1>
+        <p className="mt-2 text-[15px] text-muted">Tell us what you're planning to spend on.</p>
       </div>
 
-      <div className="-mt-2 space-y-5 px-5">
-        <label className="flex h-12 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 text-white/65">
-          <Search size={17} />
+      <div className="space-y-5 px-5">
+        {/* Search */}
+        <label className="flex h-12 items-center gap-3 rounded-xl border border-border bg-surface-2 px-4">
+          <Search size={17} className="text-muted shrink-0" />
           <input
             value={item}
             onChange={(e) => setItem(e.target.value)}
-            placeholder="Search or choose a category"
-            className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"
+            placeholder="What are you buying?"
+            className="min-w-0 flex-1 bg-transparent text-[15px] text-text outline-none placeholder:text-muted"
           />
         </label>
 
+        {/* Category chips */}
         <div className="grid grid-cols-6 gap-2">
           {categoryOptions.map((option) => {
             const Icon = option.icon;
+            const active = category === (option.name === "Food" ? "Food & Drinks" : option.name);
             return (
               <button
                 key={option.name}
                 onClick={() => setCategory(option.name === "Food" ? "Food & Drinks" : option.name)}
-                className="rounded-xl bg-[#101723] px-1 py-3 ring-1 ring-white/5 transition hover:bg-[#171F2D]"
+                className={`rounded-xl px-1 py-3 ring-1 transition-all ${active ? "bg-brand-soft ring-brand/30 text-brand" : "bg-surface-2 ring-border text-muted hover:text-text"}`}
               >
-                <Icon size={18} className="mx-auto text-[#B36BFF]" />
-                <span className="mt-2 block text-[10px] font-bold text-white/80">{option.name}</span>
+                <Icon size={18} className="mx-auto" />
+                <span className="mt-1.5 block text-[10px] font-semibold">{option.name}</span>
               </button>
             );
           })}
         </div>
 
+        {/* Amount + category */}
         <div className="grid grid-cols-[1fr_120px] gap-3">
-          <input
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount"
-            className="h-12 rounded-xl border border-white/10 bg-[#101723] px-4 text-sm text-white outline-none focus:border-[#8D3CFF]"
-          />
+          <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" className={inputCls} />
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="h-12 rounded-xl border border-white/10 bg-[#101723] px-3 text-sm text-white outline-none focus:border-[#8D3CFF]"
+            className="h-12 rounded-xl border border-border bg-surface-2 px-3 text-[14px] text-text outline-none focus:border-brand transition-colors"
           >
             {budgetItems.map((budget) => (
-              <option key={budget.name} value={budget.name}>
-                {budget.name}
-              </option>
+              <option key={budget.name} value={budget.name}>{budget.name}</option>
             ))}
           </select>
         </div>
 
+        {/* Budget check */}
         {selectedBudget && (
-          <div className="rounded-2xl bg-[#101723] p-4 ring-1 ring-white/10">
+          <div className="rounded-card bg-surface p-4 ring-1 ring-border">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold text-white/50">Budget check</p>
-                <p className="mt-1 text-sm font-black">{selectedBudget.name}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Budget check</p>
+                <p className="mt-1 text-[15px] font-bold text-text">{selectedBudget.name}</p>
               </div>
-              <span className={`rounded-full px-3 py-1 text-xs font-black ${afterAskRemaining >= 0 ? "bg-[#54F28A] text-[#06110D]" : "bg-[#FFCE3D] text-black"}`}>
-                {afterAskRemaining >= 0 ? "Within budget" : "Over budget"}
-              </span>
+              <VerdictPill
+                tone={afterAskRemaining >= 0 ? "safe" : "over"}
+                label={afterAskRemaining >= 0 ? "You're good" : "Over budget"}
+              />
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
               <StatCard label="Left" value={money(categoryRemaining)} tone={categoryRemaining >= 0 ? "good" : "bad"} />
@@ -776,6 +835,7 @@ function Ask({ setScreen, setPurchase, budgetItems }) {
           </div>
         )}
 
+        {/* AI Insights */}
         <div>
           <SectionRow title="Affordit AI insights" action="Budget-aware" />
           <div className="mt-3 space-y-3">
@@ -785,19 +845,22 @@ function Ask({ setScreen, setPurchase, budgetItems }) {
           </div>
         </div>
 
+        {/* Popular ideas */}
         <div>
           <SectionRow title="Popular ideas" action="See all" />
           <div className="mt-3 space-y-2">
             {demoScenarios.map((scenario) => (
-              <button key={scenario.item} onClick={() => chooseScenario(scenario)} className="flex w-full items-center gap-3 rounded-xl bg-[#101723] p-3 text-left ring-1 ring-white/5">
-                <ImageTile className="h-10 w-10 shrink-0 rounded-lg" position="center 70%" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold">{scenario.item}</p>
-                  <p className="text-xs text-white/45">{scenario.merchant}</p>
+              <button key={scenario.item} onClick={() => chooseScenario(scenario)} className="flex w-full items-center gap-3 rounded-xl bg-surface p-3 text-left ring-1 ring-border hover:bg-surface-2 transition-colors">
+                <div className="h-10 w-10 shrink-0 rounded-lg bg-surface-2 flex items-center justify-center text-base">
+                  {scenario.category === "Food & Drinks" ? "🍽️" : scenario.category === "Shopping" ? "👟" : scenario.category === "Trip" ? "✈️" : "🎵"}
                 </div>
-                <p className="text-xs font-black">{money(scenario.amount)}</p>
-                <span className="grid h-7 w-7 place-items-center rounded-full border border-[#B36BFF]/45 text-[#B36BFF]">
-                  <Plus size={15} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] font-semibold text-text">{scenario.item}</p>
+                  <p className="text-xs text-muted">{scenario.merchant}</p>
+                </div>
+                <p className="text-[13px] font-bold text-text">{money(scenario.amount)}</p>
+                <span className="grid h-7 w-7 place-items-center rounded-full border border-brand/30 text-brand">
+                  <Plus size={14} />
                 </span>
               </button>
             ))}
@@ -809,7 +872,7 @@ function Ask({ setScreen, setPurchase, budgetItems }) {
             setPurchase({ item, amount: Number(amount) || 0, category, merchant: "Manual check" });
             setScreen("result");
           }}
-          className="h-12 w-full"
+          className="h-12 w-full text-[15px]"
         >
           Ask Affordit
         </Button>
@@ -821,11 +884,13 @@ function Ask({ setScreen, setPurchase, budgetItems }) {
 function SectionRow({ title, action }) {
   return (
     <div className="flex items-center justify-between">
-      <h2 className="text-sm font-black">{title}</h2>
-      {action && <button className="text-xs font-bold text-[#B36BFF]">{action}</button>}
+      <h2 className="text-[15px] font-bold text-text">{title}</h2>
+      {action && <button className="text-[11px] font-semibold uppercase tracking-[0.08em] text-brand">{action}</button>}
     </div>
   );
 }
+
+// ─── Verdict / Result ─────────────────────────────────────────────────────────
 
 function getVerdict(purchase, budgetItems = budgetCategories) {
   const amount = Number(purchase.amount || 0);
@@ -839,64 +904,65 @@ function getVerdict(purchase, budgetItems = budgetCategories) {
   const verdict = isOverSafeSpend ? "skip" : isOverCategoryBudget ? "hold" : isOverDailyLimit ? "dailyLimit" : amount <= Math.max(4800, categoryRemaining * 0.35) ? "go" : "cheaper";
   const budgetLine = selectedBudget
     ? `${selectedBudget.name} has ${money(categoryRemaining)} left before this ask and ${money(afterAskRemaining)} after it.`
-    : "No matching budget category was found, so Affordit is falling back to safe-to-spend.";
+    : "No matching budget category — falling back to safe-to-spend.";
+
   const map = {
     dailyLimit: {
-      label: "Hold up",
-      headline: "Hold up",
+      label: "Easy — slow down",
+      headline: "Easy — slow down",
       score: 64,
       icon: Clock,
-      color: "#FFCE3D",
-      summary: `This will push you over your daily ${purchase.category || "category"} limit.`,
+      tone: "caution",
+      summary: `This one bites into tomorrow's budget. Your daily ${purchase.category || "category"} limit is already stretched.`,
       action: "Try cheaper",
       secondary: "See options",
       why: dailyRule
-        ? `You've already spent ${money(1250)} today on ${dailyRule.name}. Your daily limit is ${money(dailyRule.dailyLimit)}. ${budgetLine}`
+        ? `Tomorrow's safe number drops if you go ahead. You've already spent ${money(1250)} on ${dailyRule.name} today. Daily limit is ${money(dailyRule.dailyLimit)}. ${budgetLine}`
         : "This purchase is above today's category pace.",
     },
     go: {
-      label: "Go for it",
-      headline: "Go for it",
+      label: "You're good — enjoy it",
+      headline: "You're good",
       score: 88,
       icon: CheckCircle2,
-      color: "#54F28A",
-      summary: "This fits your spend room and keeps your plans moving.",
+      tone: "safe",
+      summary: "This fits your spend room and keeps your plans on track. Enjoy it.",
       action: "Mark bought",
       secondary: "Check another",
-      why: `${budgetLine} Your safe-to-spend amount still has room after this purchase.`,
+      why: `${budgetLine} Your safe-to-spend still has room after this.`,
     },
     hold: {
-      label: "Hold up",
+      label: "This pushes into payday",
       headline: "Hold up",
       score: 48,
       icon: Clock,
-      color: "#FFCE3D",
-      summary: "You can afford this, but it squeezes the category budget or money already reserved for upcoming plans.",
+      tone: "caution",
+      summary: "You can afford this technically, but it squeezes the category or money reserved for upcoming plans.",
       action: "Remind me",
       secondary: "Buy anyway",
-      why: `${budgetLine} Waiting until payday keeps the Mombasa plan and emergency fund more comfortable.`,
+      why: `${budgetLine} Waiting until payday keeps the Mombasa plan and emergency fund comfortable.`,
     },
     cheaper: {
-      label: "Try cheaper",
+      label: "Try a cheaper option",
       headline: "Try cheaper",
       score: 58,
       icon: ShoppingBag,
-      color: "#B36BFF",
+      tone: "brand",
       summary: "A cheaper option gets the same lifestyle win without stressing your budget.",
       action: "Try cheaper",
-      secondary: "Original",
-      why: `${budgetLine} Look for a lower option and keep the rest for plans.`,
+      secondary: "Buy anyway",
+      why: `${budgetLine} Look for a lower-priced option and keep the rest for plans.`,
     },
     skip: {
-      label: "Skip it",
+      label: "This pushes you into the red",
       headline: "Skip it",
       score: 22,
       icon: XCircle,
-      color: "#FF4D6D",
-      summary: "This clears too much discretionary cash and pushes important goals out.",
+      tone: "over",
+      summary: "This clears too much discretionary cash and pushes important goals back.",
       action: "Cool off",
       secondary: "Buy anyway",
-      why: "This purchase would take more than your current safe-to-spend amount.",
+      why: "This purchase would exceed your current safe-to-spend amount before payday.",
     },
   };
 
@@ -906,42 +972,50 @@ function getVerdict(purchase, budgetItems = budgetCategories) {
 function Result({ setScreen, purchase, budgetItems }) {
   const verdict = getVerdict(purchase, budgetItems);
   const VerdictIcon = verdict.icon;
+  const toneColor = { safe: "#2FD08A", caution: "#FFB23E", over: "#FF5C5C", brand: "#7C5CFC" }[verdict.tone] || "#7C5CFC";
 
   return (
     <PageScroll flush>
-      <div className="relative h-80 overflow-hidden">
-        <ImageTile className="absolute inset-0 opacity-85" position="center top" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/25 to-[#05080D]" />
-        <div className="relative z-10 flex h-full flex-col justify-between px-5 pb-6 pt-5">
-          <div className="flex justify-between">
-            <IconButton icon={ChevronLeft} onClick={() => setScreen("ask")} label="Back" />
-            <IconButton icon={Plus} label="Save" />
-          </div>
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-white/65">Verdict</p>
-            <h1 className="mt-1 text-4xl font-black tracking-tight" style={{ color: verdict.color }}>
-              {verdict.headline}
-            </h1>
-            <p className="mt-3 max-w-xs text-sm leading-6 text-white/85">{verdict.summary}</p>
-          </div>
+      {/* Header zone */}
+      <div
+        className="relative px-5 pb-8 pt-6"
+        style={{ background: `linear-gradient(180deg, ${toneColor}14 0%, transparent 100%)` }}
+      >
+        <div className="flex justify-between mb-8">
+          <IconButton icon={ChevronLeft} onClick={() => setScreen("ask")} label="Back" />
+          <IconButton icon={Plus} label="Save" />
         </div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Verdict</p>
+        <h1 className="mt-2 font-display text-[40px] font-bold tracking-tight" style={{ color: toneColor }}>
+          {verdict.headline}
+        </h1>
+        <p className="mt-3 max-w-xs text-[15px] leading-6 text-muted">{verdict.summary}</p>
       </div>
 
       <div className="space-y-5 px-5">
-        <div className="-mt-2 flex items-center gap-3 rounded-xl bg-[#101723] p-3 ring-1 ring-white/5">
-          <ImageTile className="h-14 w-14 shrink-0 rounded-xl" position="center 70%" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold">{purchase.item}</p>
-            <p className="mt-1 text-xl font-black text-[#C39BFF]">{money(purchase.amount)}</p>
+        {/* Purchase row */}
+        <div className="flex items-center gap-3 rounded-card bg-surface p-4 ring-1 ring-border">
+          <div className="h-14 w-14 shrink-0 rounded-xl bg-surface-2 flex items-center justify-center text-2xl">
+            {purchase.category === "Food & Drinks" ? "🍽️" : purchase.category === "Shopping" ? "🛍️" : purchase.category === "Trip" ? "✈️" : "🎯"}
           </div>
-          <div className="grid h-12 w-12 place-items-center rounded-xl bg-black/25" style={{ color: verdict.color }}>
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] font-bold text-text">{purchase.item}</p>
+            <p className="mt-1 text-xl font-bold" style={{ color: toneColor }}>{money(purchase.amount)}</p>
+          </div>
+          <div className="grid h-12 w-12 place-items-center rounded-xl bg-surface-2" style={{ color: toneColor }}>
             <VerdictIcon size={24} />
           </div>
         </div>
 
+        {/* Big verdict chip */}
+        <div className="flex justify-center">
+          <VerdictPill tone={verdict.tone} label={verdict.label} />
+        </div>
+
+        {/* Why */}
         <div>
-          <p className="mb-2 text-sm font-black">Why?</p>
-          <p className="rounded-xl bg-[#101723] p-4 text-sm leading-6 text-white/75 ring-1 ring-white/5">{verdict.why}</p>
+          <p className="mb-2 text-[15px] font-bold text-text">Why?</p>
+          <p className="rounded-card bg-surface p-4 text-[14px] leading-6 text-muted ring-1 ring-border">{verdict.why}</p>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
@@ -962,6 +1036,8 @@ function Result({ setScreen, purchase, budgetItems }) {
     </PageScroll>
   );
 }
+
+// ─── Budget ───────────────────────────────────────────────────────────────────
 
 function BudgetScreen({ budgetItems, setBudgetItems, incomeItems }) {
   const [showForm, setShowForm] = useState(false);
@@ -990,7 +1066,6 @@ function BudgetScreen({ budgetItems, setBudgetItems, incomeItems }) {
   function addBudget() {
     const cleanLimit = Number(limit);
     if (!name || !cleanLimit) return;
-
     setBudgetItems([
       {
         name,
@@ -1000,30 +1075,29 @@ function BudgetScreen({ budgetItems, setBudgetItems, incomeItems }) {
         hasDailyLimit: Number(dailyLimit || 0) > 0,
         dailyLimit: Number(dailyLimit || 0),
         activeDays: Number(dailyLimit || 0) > 0 ? 30 : 0,
-        color: group === "needs" ? "#27D17F" : group === "savings" ? "#5BA7FF" : "#8D3CFF",
+        color: group === "needs" ? "#2FD08A" : group === "savings" ? "#7C5CFC" : "#FFB23E",
       },
       ...budgetItems,
     ]);
-    setName("");
-    setLimit("");
-    setDailyLimit("");
-    setGroup("wants");
-    setShowForm(false);
+    setName(""); setLimit(""); setDailyLimit(""); setGroup("wants"); setShowForm(false);
   }
+
+  const inputCls = "h-11 w-full rounded-xl border border-border bg-surface-2 px-3 text-[14px] text-text outline-none focus:border-brand transition-colors placeholder:text-muted";
 
   return (
     <PageScroll>
       <ScreenHeader title="Budget" subtitle="Health, limits, and AI insights" rightIcon={Plus} onRight={() => setShowForm(!showForm)} />
 
-      <div className="mx-5 mt-5 rounded-2xl bg-[#101723] p-5 ring-1 ring-white/10">
+      {/* Health card */}
+      <div className="mx-5 mt-5 rounded-card bg-surface p-5 ring-1 ring-border">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">50/20/30 health</p>
-            <p className="mt-2 text-4xl font-black">{health.score}/100</p>
-            <p className="mt-1 text-sm text-white/55">{health.status} budget structure</p>
+            <Label>50/20/30 health</Label>
+            <p className="mt-2 font-display text-4xl font-bold text-text">{health.score}/100</p>
+            <p className="mt-1 text-[14px] text-muted">{health.status} budget structure</p>
           </div>
-          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[#8D3CFF]/20 text-[#C39BFF] ring-1 ring-[#8D3CFF]/25">
-            <BarChart3 size={30} />
+          <div className="grid h-16 w-16 place-items-center rounded-xl bg-brand-soft text-brand ring-1 ring-brand/20">
+            <BarChart3 size={28} />
           </div>
         </div>
         <div className="mt-5 space-y-3">
@@ -1033,22 +1107,21 @@ function BudgetScreen({ budgetItems, setBudgetItems, incomeItems }) {
         </div>
       </div>
 
+      {/* Add form */}
       {showForm && (
-        <div className="mx-5 mt-4 rounded-2xl bg-[#101723] p-4 ring-1 ring-white/10">
-          <p className="mb-3 text-sm font-black">Add budget category</p>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Category name" className="mb-3 h-11 w-full rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]" />
+        <div className="mx-5 mt-4 rounded-card bg-surface p-4 ring-1 ring-border">
+          <p className="mb-3 text-[15px] font-bold text-text">Add budget category</p>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Category name" className={`${inputCls} mb-3`} />
           <div className="mb-3 grid grid-cols-2 gap-3">
-            <input value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="Monthly limit" className="h-11 rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]" />
-            <input value={dailyLimit} onChange={(e) => setDailyLimit(e.target.value)} placeholder="Daily limit" className="h-11 rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]" />
+            <input value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="Monthly limit" className={inputCls} />
+            <input value={dailyLimit} onChange={(e) => setDailyLimit(e.target.value)} placeholder="Daily limit" className={inputCls} />
           </div>
-          <select value={group} onChange={(e) => setGroup(e.target.value)} className="mb-3 h-11 w-full rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]">
-            <option value="needs">Needs - 50%</option>
-            <option value="savings">Savings/plans - 20%</option>
-            <option value="wants">Wants - 30%</option>
+          <select value={group} onChange={(e) => setGroup(e.target.value)} className={`${inputCls} mb-3`}>
+            <option value="needs">Needs — 50%</option>
+            <option value="savings">Savings/plans — 20%</option>
+            <option value="wants">Wants — 30%</option>
           </select>
-          <Button onClick={addBudget} className="h-11 w-full">
-            Save budget
-          </Button>
+          <Button onClick={addBudget} className="h-11 w-full">Save budget</Button>
         </div>
       )}
 
@@ -1072,35 +1145,33 @@ function BudgetScreen({ budgetItems, setBudgetItems, incomeItems }) {
 function BudgetRuleCard({ rule }) {
   const delta = rule.value - rule.target;
   const okay = Math.abs(delta) <= 5;
-
   return (
-    <div className="rounded-xl bg-black/25 p-4 ring-1 ring-white/5">
+    <div className="rounded-xl bg-surface-2 p-4 ring-1 ring-border">
       <div className="mb-2 flex items-center justify-between">
         <div>
-          <p className="font-black">{rule.label}</p>
-          <p className="text-xs text-white/45">Target {rule.target}% - {money(rule.amount)}</p>
+          <p className="text-[15px] font-bold text-text">{rule.label}</p>
+          <p className="text-[12px] text-muted">Target {rule.target}% — {money(rule.amount)}</p>
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-black ${okay ? "bg-[#54F28A] text-[#06110D]" : "bg-[#FFCE3D] text-black"}`}>
-          {rule.value}%
-        </span>
+        <VerdictPill tone={okay ? "safe" : "caution"} label={`${rule.value}%`} />
       </div>
       <Progress value={Math.min(100, rule.value)} color={rule.color} />
-      <p className="mt-2 text-xs text-white/45">{delta === 0 ? "Exactly on target." : `${Math.abs(delta)}% ${delta > 0 ? "above" : "below"} target.`}</p>
+      <p className="mt-2 text-[12px] text-muted">
+        {delta === 0 ? "Exactly on target." : `${Math.abs(delta)}% ${delta > 0 ? "above" : "below"} target.`}
+      </p>
     </div>
   );
 }
 
 function BudgetComparisonCard({ row, updateBudget }) {
-  const statusClass = row.status === "Over" ? "bg-[#FF4D6D] text-white" : row.status === "Close" ? "bg-[#FFCE3D] text-black" : "bg-[#54F28A] text-[#06110D]";
-
+  const statusTone = row.status === "Over" ? "over" : row.status === "Close" ? "caution" : "safe";
   return (
-    <div className="rounded-2xl bg-[#101723] p-4 ring-1 ring-white/5">
+    <div className="rounded-card bg-surface p-4 ring-1 ring-border">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-black">{row.name}</p>
-          <p className="mt-1 text-xs text-white/50">{row.group || "wants"} - {money(row.spent)} actual / {money(row.limit)} budget</p>
+          <p className="text-[15px] font-bold text-text">{row.name}</p>
+          <p className="mt-1 text-[12px] text-muted">{row.group || "wants"} · {money(row.spent)} actual / {money(row.limit)} budget</p>
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-black ${statusClass}`}>{row.status}</span>
+        <VerdictPill tone={statusTone} label={row.status} />
       </div>
       <div className="mt-3">
         <Progress value={row.used} color={row.color} />
@@ -1111,12 +1182,12 @@ function BudgetComparisonCard({ row, updateBudget }) {
         <StatCard label={row.remaining >= 0 ? "Left" : "Over"} value={money(Math.abs(row.remaining))} tone={row.remaining >= 0 ? "good" : "bad"} />
       </div>
       <div className="mt-3 grid grid-cols-[1fr_110px] gap-2">
-        <select value={row.group || "wants"} onChange={(e) => updateBudget(row.name, "group", e.target.value)} className="h-10 rounded-xl border border-white/10 bg-black/25 px-3 text-xs outline-none focus:border-[#8D3CFF]">
+        <select value={row.group || "wants"} onChange={(e) => updateBudget(row.name, "group", e.target.value)} className="h-10 rounded-xl border border-border bg-surface-2 px-3 text-[13px] text-text outline-none focus:border-brand transition-colors">
           <option value="needs">Needs</option>
           <option value="savings">Savings</option>
           <option value="wants">Wants</option>
         </select>
-        <input value={row.limit || ""} onChange={(e) => updateBudget(row.name, "limit", e.target.value)} className="h-10 rounded-xl border border-white/10 bg-black/25 px-3 text-xs outline-none focus:border-[#8D3CFF]" />
+        <input value={row.limit || ""} onChange={(e) => updateBudget(row.name, "limit", e.target.value)} className="h-10 rounded-xl border border-border bg-surface-2 px-3 text-[13px] text-text outline-none focus:border-brand transition-colors" />
       </div>
     </div>
   );
@@ -1124,12 +1195,14 @@ function BudgetComparisonCard({ row, updateBudget }) {
 
 function InsightCard({ text, compact = false }) {
   return (
-    <div className={`rounded-2xl bg-gradient-to-br from-[#151B2A] to-[#0C1019] ring-1 ring-[#8D3CFF]/20 ${compact ? "p-3" : "p-4"}`}>
-      <p className="text-xs font-black uppercase tracking-[0.2em] text-[#B36BFF]">Affordit AI</p>
-      <p className={`${compact ? "mt-1 text-xs leading-5" : "mt-2 text-sm leading-6"} text-white/80`}>{text}</p>
+    <div className={`rounded-card bg-surface ring-1 ring-brand/15 ${compact ? "p-3" : "p-4"}`}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-brand">Affordit AI</p>
+      <p className={`${compact ? "mt-1 text-[13px] leading-5" : "mt-2 text-[14px] leading-6"} text-muted`}>{text}</p>
     </div>
   );
 }
+
+// ─── Expenses / Spend ─────────────────────────────────────────────────────────
 
 function Expenses({ expenseItems, setExpenseItems, incomeItems, setIncomeItems, budgetItems, setBudgetItems }) {
   const [mode, setMode] = useState("expense");
@@ -1143,20 +1216,18 @@ function Expenses({ expenseItems, setExpenseItems, incomeItems, setIncomeItems, 
   function addEntry() {
     const cleanAmount = Number(amount);
     if (!name || !cleanAmount) return;
-
     if (mode === "income") {
       setIncomeItems([{ source: name, category: "Income", amount: cleanAmount, date: "Today" }, ...incomeItems]);
     } else if (mode === "budget") {
-      setBudgetItems([{ name, group: "wants", spent: 0, limit: cleanAmount, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#8D3CFF" }, ...budgetItems]);
+      setBudgetItems([{ name, group: "wants", spent: 0, limit: cleanAmount, hasDailyLimit: false, dailyLimit: 0, activeDays: 0, color: "#7C5CFC" }, ...budgetItems]);
     } else {
       setExpenseItems([{ merchant: name, category, amount: cleanAmount, date: "Today" }, ...expenseItems]);
       setBudgetItems(budgetItems.map((budget) => (budget.name === category ? { ...budget, spent: Number(budget.spent || 0) + cleanAmount } : budget)));
     }
-
-    setName("");
-    setAmount("");
-    setShowForm(false);
+    setName(""); setAmount(""); setShowForm(false);
   }
+
+  const inputCls = "h-11 w-full rounded-xl border border-border bg-surface-2 px-3 text-[14px] text-text outline-none focus:border-brand transition-colors placeholder:text-muted";
 
   return (
     <PageScroll>
@@ -1164,23 +1235,30 @@ function Expenses({ expenseItems, setExpenseItems, incomeItems, setIncomeItems, 
 
       <div className="px-5">
         <Tabs items={["This month", "This week", "Today"]} active="This month" />
+
         <div className="mt-5 flex items-center gap-5">
-          <div className="grid h-32 w-32 shrink-0 place-items-center rounded-full" style={{ background: "conic-gradient(#8D3CFF 0 42%, #27D17F 42% 64%, #5BA7FF 64% 79%, #FFCE3D 79% 90%, #F97316 90% 100%)" }}>
-            <div className="grid h-20 w-20 place-items-center rounded-full bg-[#05080D]">
-              <BarChart3 size={26} className="text-white/70" />
+          {/* Donut */}
+          <div
+            className="grid h-32 w-32 shrink-0 place-items-center rounded-full"
+            style={{
+              background: "conic-gradient(#FFB23E 0 42%, #2FD08A 42% 64%, #7C5CFC 64% 79%, #5BA7FF 79% 90%, #9AA3B2 90% 100%)",
+            }}
+          >
+            <div className="grid h-20 w-20 place-items-center rounded-full bg-bg">
+              <BarChart3 size={24} className="text-muted" />
             </div>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-2xl font-black">{money(totalSpent)}</p>
-            <p className="text-xs text-white/50">Total spent</p>
-            <div className="mt-4 space-y-2">
+            <p className="font-display text-2xl font-bold text-text">{money(totalSpent)}</p>
+            <p className="text-[12px] text-muted">Total spent</p>
+            <div className="mt-3 space-y-1.5">
               {budgetItems.slice(0, 5).map((budget) => (
-                <div key={budget.name} className="flex items-center justify-between gap-3 text-xs">
-                  <span className="flex items-center gap-2 text-white/65">
-                    <span className="h-2 w-2 rounded-full" style={{ background: budget.color }} />
+                <div key={budget.name} className="flex items-center justify-between gap-2 text-[12px]">
+                  <span className="flex items-center gap-1.5 text-muted">
+                    <span className="h-2 w-2 rounded-full shrink-0" style={{ background: budget.color }} />
                     {budget.name}
                   </span>
-                  <span className="font-bold">{money(budget.spent)}</span>
+                  <span className="font-bold text-text">{money(budget.spent)}</span>
                 </div>
               ))}
             </div>
@@ -1193,28 +1271,24 @@ function Expenses({ expenseItems, setExpenseItems, incomeItems, setIncomeItems, 
       </div>
 
       {showForm && (
-        <div className="mx-5 mt-4 rounded-2xl bg-[#101723] p-4 ring-1 ring-white/10">
-          <div className="mb-3 grid grid-cols-3 gap-2 rounded-xl bg-black/25 p-1">
+        <div className="mx-5 mt-4 rounded-card bg-surface p-4 ring-1 ring-border">
+          <div className="mb-3 grid grid-cols-3 gap-2 rounded-xl bg-surface-2 p-1">
             {["expense", "income", "budget"].map((item) => (
-              <button key={item} onClick={() => setMode(item)} className={`rounded-lg py-2 text-xs font-bold ${mode === item ? "bg-[#8D3CFF]" : "text-white/55"}`}>
+              <button key={item} onClick={() => setMode(item)} className={`rounded-lg py-2 text-[13px] font-semibold transition-colors capitalize ${mode === item ? "bg-brand text-white" : "text-muted"}`}>
                 {item}
               </button>
             ))}
           </div>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={mode === "income" ? "Income source" : mode === "budget" ? "Budget name" : "Expense name"} className="mb-3 h-11 w-full rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]" />
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={mode === "income" ? "Income source" : mode === "budget" ? "Budget name" : "Expense name"} className={`${inputCls} mb-3`} />
           {mode === "expense" && (
-            <select value={category} onChange={(e) => setCategory(e.target.value)} className="mb-3 h-11 w-full rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]">
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className={`${inputCls} mb-3`}>
               {budgetItems.map((budget) => (
-                <option key={budget.name} value={budget.name}>
-                  {budget.name}
-                </option>
+                <option key={budget.name} value={budget.name}>{budget.name}</option>
               ))}
             </select>
           )}
-          <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={mode === "budget" ? "Monthly limit" : "Amount"} className="mb-3 h-11 w-full rounded-xl border border-white/10 bg-black/25 px-3 text-sm outline-none focus:border-[#8D3CFF]" />
-          <Button onClick={addEntry} className="h-11 w-full">
-            Save
-          </Button>
+          <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={mode === "budget" ? "Monthly limit" : "Amount"} className={`${inputCls} mb-3`} />
+          <Button onClick={addEntry} className="h-11 w-full">Save</Button>
         </div>
       )}
 
@@ -1237,17 +1311,43 @@ function Expenses({ expenseItems, setExpenseItems, incomeItems, setIncomeItems, 
   );
 }
 
+function BudgetStrip({ budget }) {
+  const used = budget.limit ? Math.round((Number(budget.spent || 0) / Number(budget.limit || 1)) * 100) : 0;
+  return (
+    <div className="rounded-card bg-surface p-3 ring-1 ring-border">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="h-10 w-10 shrink-0 rounded-lg bg-surface-2 flex items-center justify-center text-sm font-bold" style={{ color: budget.color }}>
+            {budget.name[0]}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[14px] font-semibold text-text">{budget.name}</p>
+            <p className="text-[11px] text-muted">Daily limit: {money(budget.dailyLimit || Math.round(budget.limit / 30))}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-[13px] font-bold text-text">{money(budget.spent)}</p>
+          <p className="text-[11px] text-muted">of {money(budget.limit)}</p>
+        </div>
+      </div>
+      <Progress value={used} color={budget.color || "#7C5CFC"} />
+    </div>
+  );
+}
+
 function Tabs({ items, active }) {
   return (
-    <div className="flex gap-7 border-b border-white/10">
+    <div className="flex gap-7 border-b border-border">
       {items.map((item) => (
-        <button key={item} className={`pb-3 text-xs font-bold ${item === active ? "border-b-2 border-[#B36BFF] text-white" : "text-white/45"}`}>
+        <button key={item} className={`pb-3 text-[13px] font-semibold transition-colors ${item === active ? "border-b-2 border-brand text-text" : "text-muted"}`}>
           {item}
         </button>
       ))}
     </div>
   );
 }
+
+// ─── Planned Expenses ─────────────────────────────────────────────────────────
 
 function PlannedExpenses() {
   return (
@@ -1258,29 +1358,26 @@ function PlannedExpenses() {
       </div>
       <div className="mt-4 space-y-3 px-5">
         {plannedExpenses.map((plan, index) => {
-          const pct = plan.target ? Math.round((plan.amount / plan.target) * 100) : 0;
+          const progress = plan.target ? Math.round((plan.amount / plan.target) * 100) : 0;
           return (
-            <div key={plan.name} className="overflow-hidden rounded-2xl bg-[#101723] ring-1 ring-white/5">
+            <div key={plan.name} className="overflow-hidden rounded-card bg-surface ring-1 ring-border">
               {index === 0 && (
-                <div className="relative h-36">
-                  <ImageTile className="absolute inset-0 opacity-90" position="center 65%" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#101723] to-transparent" />
+                <div className="h-32 bg-gradient-to-br from-brand-soft to-surface flex items-center justify-center text-5xl">
+                  🏖️
                 </div>
               )}
               <div className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-black">{plan.name}</p>
-                    <p className="mt-1 text-xs text-white/55">
-                      {money(plan.amount)} / {money(plan.target)}
-                    </p>
+                    <p className="text-[15px] font-bold text-text">{plan.name}</p>
+                    <p className="mt-1 text-[12px] text-muted">{money(plan.amount)} / {money(plan.target)}</p>
                   </div>
-                  <p className="text-sm font-black">{pct}%</p>
+                  <p className="font-display text-[15px] font-bold text-brand">{progress}%</p>
                 </div>
                 <div className="mt-3">
-                  <Progress value={pct} color="#8D3CFF" />
+                  <Progress value={progress} color="#7C5CFC" />
                 </div>
-                <div className="mt-2 flex justify-between text-[11px] text-white/45">
+                <div className="mt-2 flex justify-between text-[12px] text-muted">
                   <span>{plan.date}</span>
                   <span>{money(Math.ceil((plan.target - plan.amount) / 35))}/day</span>
                 </div>
@@ -1293,6 +1390,8 @@ function PlannedExpenses() {
   );
 }
 
+// ─── News ─────────────────────────────────────────────────────────────────────
+
 function NewsScreen({ budgetItems, incomeItems }) {
   const health = budgetHealth(budgetItems, incomeItems);
   const insights = generateBudgetInsights(budgetItems, incomeItems);
@@ -1301,24 +1400,19 @@ function NewsScreen({ budgetItems, incomeItems }) {
     <PageScroll>
       <ScreenHeader title="Briefing" subtitle="Financial news and market context" rightIcon={Newspaper} />
 
-      <div className="mx-5 mt-5 overflow-hidden rounded-2xl bg-[#101723] ring-1 ring-white/10">
-        <div className="relative p-5">
-          <ImageTile className="absolute inset-0 opacity-20" position="center top" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#101723] via-[#101723]/95 to-[#101723]/70" />
-          <div className="relative">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#B36BFF]">AI daily briefing</p>
-                <h2 className="mt-2 text-2xl font-black leading-tight">{marketBriefing.headline}</h2>
-              </div>
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-black/30 text-[#C39BFF] ring-1 ring-white/10">
-                <Newspaper size={24} />
-              </span>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-white/75">{marketBriefing.summary}</p>
-            <p className="mt-3 text-xs font-semibold text-white/45">{marketBriefing.updatedAt} - demo market briefing</p>
+      {/* AI Daily Briefing */}
+      <div className="mx-5 mt-5 rounded-card bg-surface p-5 ring-1 ring-border">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1">
+            <Label>AI daily briefing</Label>
+            <h2 className="mt-2 font-display text-[20px] font-bold leading-tight text-text">{marketBriefing.headline}</h2>
+          </div>
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand ring-1 ring-brand/20">
+            <Newspaper size={22} />
           </div>
         </div>
+        <p className="mt-3 text-[14px] leading-6 text-muted">{marketBriefing.summary}</p>
+        <p className="mt-3 text-[11px] font-semibold text-muted/60">{marketBriefing.updatedAt} · demo market briefing</p>
       </div>
 
       <SectionHeader title="What matters today" />
@@ -1344,22 +1438,20 @@ function NewsScreen({ budgetItems, incomeItems }) {
 
       <SectionHeader title="Budget impact" />
       <div className="space-y-3 px-5">
-        <div className="rounded-2xl bg-[#101723] p-4 ring-1 ring-white/5">
+        <div className="rounded-card bg-surface p-4 ring-1 ring-border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-white/50">Budget health</p>
-              <p className="mt-1 text-2xl font-black">{health.score}/100</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Budget health</p>
+              <p className="mt-1 font-display text-2xl font-bold text-text">{health.score}/100</p>
             </div>
-            <span className={`rounded-full px-3 py-1 text-xs font-black ${health.status === "Healthy" ? "bg-[#54F28A] text-[#06110D]" : health.status === "Watch" ? "bg-[#FFCE3D] text-black" : "bg-[#FF4D6D] text-white"}`}>
-              {health.status}
-            </span>
+            <VerdictPill
+              tone={health.status === "Healthy" ? "safe" : health.status === "Watch" ? "caution" : "over"}
+              label={health.status}
+            />
           </div>
-          <p className="mt-3 text-sm leading-6 text-white/65">{insights[0]}</p>
+          <p className="mt-3 text-[14px] leading-6 text-muted">{insights[0]}</p>
         </div>
-        <InsightCard
-          compact
-          text="Production version: this section should pull live NSE data, fund factsheets, and trusted financial headlines every morning, then generate a fresh AI brief from a backend."
-        />
+        <InsightCard compact text="Production version: this section pulls live NSE data, fund factsheets, and financial headlines every morning, then generates a fresh AI brief from a backend." />
       </div>
     </PageScroll>
   );
@@ -1368,36 +1460,37 @@ function NewsScreen({ budgetItems, incomeItems }) {
 function MarketMoverCard({ mover }) {
   const up = mover.tone === "up";
   const Icon = up ? TrendingUp : TrendingDown;
-
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-[#101723] p-4 ring-1 ring-white/5">
-      <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${up ? "bg-[#1E9E55]/20 text-[#54F28A]" : "bg-[#FF4D6D]/20 text-[#FF6B7D]"}`}>
-        <Icon size={21} />
+    <div className="flex items-center gap-3 rounded-card bg-surface p-4 ring-1 ring-border">
+      <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${up ? "bg-safe/10 text-safe" : "bg-over/10 text-over"}`}>
+        <Icon size={20} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-black">{mover.symbol}</p>
-        <p className="text-xs text-white/45">{mover.name}</p>
+        <p className="text-[14px] font-bold text-text">{mover.symbol}</p>
+        <p className="text-[12px] text-muted">{mover.name}</p>
       </div>
-      <p className={`text-sm font-black ${up ? "text-[#54F28A]" : "text-[#FF6B7D]"}`}>{mover.change}</p>
+      <p className={`text-[14px] font-bold ${up ? "text-safe" : "text-over"}`}>{mover.change}</p>
     </div>
   );
 }
 
 function FundWatchCard({ fund }) {
   return (
-    <div className="rounded-2xl bg-[#101723] p-4 ring-1 ring-white/5">
+    <div className="rounded-card bg-surface p-4 ring-1 ring-border">
       <div className="flex items-center gap-3">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#8D3CFF]/20 text-[#C39BFF]">
-          <PiggyBank size={20} />
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand">
+          <PiggyBank size={18} />
         </div>
         <div>
-          <p className="font-black">{fund.name}</p>
-          <p className="mt-1 text-sm leading-6 text-white/65">{fund.note}</p>
+          <p className="text-[14px] font-bold text-text">{fund.name}</p>
+          <p className="mt-1 text-[13px] leading-5 text-muted">{fund.note}</p>
         </div>
       </div>
     </div>
   );
 }
+
+// ─── History ──────────────────────────────────────────────────────────────────
 
 function HistoryScreen() {
   return (
@@ -1424,31 +1517,59 @@ function HistoryScreen() {
 
 function ActivityRow({ item, meta, amount, label, tone = "neutral" }) {
   const toneMap = {
-    good: "bg-[#1E9E55] text-white",
-    bad: "bg-[#D63E22] text-white",
-    warning: "bg-[#FF9F1C] text-black",
-    purple: "bg-[#8D3CFF] text-white",
-    neutral: "bg-[#101723] text-white",
+    good: "bg-safe/15 text-safe",
+    bad: "bg-over/10 text-over",
+    warning: "bg-caution/15 text-caution",
+    purple: "bg-brand-soft text-brand",
+    neutral: "bg-surface-2 text-muted",
+  };
+  const iconTone = {
+    good: "bg-safe/15 text-safe",
+    bad: "bg-surface-2 text-muted",
+    warning: "bg-caution/10 text-caution",
+    purple: "bg-brand-soft text-brand",
+    neutral: "bg-surface-2 text-muted",
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-[#101723] p-3 ring-1 ring-white/5">
-      <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${toneMap[tone]}`}>
-        <CreditCard size={17} />
+    <div className="flex items-center gap-3 rounded-xl bg-surface p-3 ring-1 ring-border">
+      <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${iconTone[tone]}`}>
+        <CreditCard size={16} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold">{item}</p>
-        <p className="text-xs text-white/45">{meta}</p>
+        <p className="text-[14px] font-semibold text-text">{item}</p>
+        <p className="text-[12px] text-muted">{meta}</p>
       </div>
-      {label && <p className={`text-xs font-black ${tone === "good" ? "text-[#54F28A]" : tone === "warning" ? "text-[#FF9F1C]" : tone === "purple" ? "text-[#B36BFF]" : "text-[#FF6B3D]"}`}>{label}</p>}
-      <p className="text-xs font-black">{money(amount)}</p>
+      {label && (
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${toneMap[tone]}`}>{label}</span>
+      )}
+      <p className="text-[13px] font-bold text-text">{money(amount)}</p>
     </div>
   );
 }
 
-function PageScroll({ children, flush }) {
-  return <main className={`min-h-0 flex-1 overflow-y-auto pb-6 ${flush ? "" : "pt-0"}`}>{children}</main>;
+// ─── Section header ───────────────────────────────────────────────────────────
+
+function SectionHeader({ title, action, onClick }) {
+  return (
+    <div className="mb-3 mt-6 flex items-center justify-between px-5">
+      <h2 className="text-[15px] font-bold text-text">{title}</h2>
+      {action && (
+        <button onClick={onClick} className="text-[11px] font-semibold uppercase tracking-[0.08em] text-brand">
+          {action}
+        </button>
+      )}
+    </div>
+  );
 }
+
+// ─── PageScroll ───────────────────────────────────────────────────────────────
+
+function PageScroll({ children, flush }) {
+  return <main className={`min-h-0 flex-1 overflow-y-auto pb-6 scrollbar-none ${flush ? "" : "pt-0"}`}>{children}</main>;
+}
+
+// ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function AfforditPrototype() {
   const [screen, setScreen] = useState("landing");
@@ -1486,9 +1607,9 @@ export default function AfforditPrototype() {
         <motion.div
           key={screen}
           className="flex min-h-0 flex-1 flex-col"
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
+          exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.18 }}
         >
           {screens[screen] || screens.dashboard}

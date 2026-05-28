@@ -3,9 +3,22 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  background: #020306;
+  --bg: #0E1117;
+  --surface: #181C24;
+  --surface-2: #222732;
+  --border: #2C323D;
+  --text: #F4F6FA;
+  --text-muted: #9AA3B2;
+  --brand: #7C5CFC;
+  --brand-soft: #2A2350;
+  --safe: #2FD08A;
+  --caution: #FFB23E;
+  --over: #FF5C5C;
+
+  color-scheme: dark;
+  font-family: "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
 }
 
 * {
@@ -16,7 +29,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #020306;
+  background: var(--bg);
 }
 
 button,
@@ -27,4 +40,40 @@ select {
 
 button {
   cursor: pointer;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hero number count-up animation */
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-animate {
+  animation: hero-in 0.4s ease-out forwards;
+}
+
+/* Verdict chip pop */
+@keyframes chip-pop {
+  0%   { opacity: 0; transform: scale(0.82); }
+  70%  { transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.chip-pop {
+  animation: chip-pop 0.28s ease-out forwards;
+}
+
+/* Ring fill animation (for SVG stroke-dashoffset) */
+@keyframes ring-fill {
+  from { stroke-dashoffset: var(--ring-full); }
+  to   { stroke-dashoffset: var(--ring-offset); }
+}
+.ring-animate {
+  animation: ring-fill 0.7s ease-out forwards;
 }
