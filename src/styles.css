@@ -5,17 +5,19 @@
 :root {
   color-scheme: light;
   font-family: "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, sans-serif;
-  background: #eef4ff;
-  --affordit-ink: #101828;
+  background: #f6efe4;
+  --affordit-ink: #07111f;
   --affordit-muted: #667085;
-  --affordit-soft: #f7f9fc;
-  --affordit-card: rgba(255, 255, 255, 0.86);
-  --affordit-brand: #2563eb;
-  --affordit-brand-2: #16a34a;
+  --affordit-soft: #fbf7ef;
+  --affordit-card: rgba(255, 255, 255, 0.9);
+  --affordit-brand: #7c3aed;
+  --affordit-brand-2: #4f46e5;
+  --affordit-safe: #009b72;
+  --affordit-safe-2: #00c48c;
   --affordit-accent: #f59e0b;
   --affordit-danger: #ef4444;
-  --affordit-navy: #07111f;
-  --affordit-ring: rgba(37, 99, 235, 0.26);
+  --affordit-navy: #061225;
+  --affordit-ring: rgba(124, 58, 237, 0.26);
 }
 
 * { box-sizing: border-box; }
@@ -24,9 +26,9 @@ html {
   min-width: 320px;
   min-height: 100%;
   background:
-    radial-gradient(circle at top left, rgba(37, 99, 235, 0.22), transparent 34rem),
-    radial-gradient(circle at bottom right, rgba(22, 163, 74, 0.2), transparent 30rem),
-    #eef4ff;
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.14), transparent 32rem),
+    radial-gradient(circle at bottom right, rgba(0, 155, 114, 0.16), transparent 30rem),
+    #f6efe4;
 }
 
 body {
@@ -34,9 +36,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(238, 244, 255, 0.92)),
-    radial-gradient(circle at 18% 8%, rgba(37, 99, 235, 0.22), transparent 32rem),
-    radial-gradient(circle at 90% 92%, rgba(22, 163, 74, 0.18), transparent 30rem);
+    radial-gradient(circle at 18% 8%, rgba(124, 58, 237, 0.12), transparent 30rem),
+    radial-gradient(circle at 88% 94%, rgba(0, 155, 114, 0.16), transparent 28rem),
+    linear-gradient(135deg, #fffaf2 0%, #f6efe4 54%, #fffaf2 100%);
   color: var(--affordit-ink);
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
@@ -44,41 +46,27 @@ body {
 
 button,
 input,
-select {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
+select { font: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
-  outline: 3px solid var(--affordit-ring);
-  outline-offset: 2px;
-}
-
-img {
-  user-select: none;
-}
+select:focus-visible { outline: 3px solid var(--affordit-ring); outline-offset: 2px; }
+img { user-select: none; }
 
 .scrollbar-none { scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
 
-/* App shell refresh */
 .min-h-screen.flex.items-center.justify-center {
   background:
-    radial-gradient(circle at top, rgba(37, 99, 235, 0.18), transparent 28rem),
-    linear-gradient(145deg, #dbeafe 0%, #f8fafc 48%, #dcfce7 100%) !important;
+    radial-gradient(circle at 12% 10%, rgba(124, 58, 237, 0.16), transparent 30rem),
+    radial-gradient(circle at 86% 86%, rgba(0, 155, 114, 0.14), transparent 28rem),
+    linear-gradient(145deg, #fff7ec 0%, #f6efe4 100%) !important;
   padding: 0;
 }
 
 .app-inner {
   isolation: isolate;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 249, 252, 0.96)) !important;
+  background: linear-gradient(180deg, #fffaf2 0%, #fbf7ef 100%) !important;
 }
 
 .app-inner::before {
@@ -88,52 +76,36 @@ img {
   pointer-events: none;
   z-index: -1;
   background:
-    radial-gradient(circle at 15% 0%, rgba(37, 99, 235, 0.12), transparent 18rem),
-    radial-gradient(circle at 100% 24%, rgba(22, 163, 74, 0.1), transparent 18rem),
-    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(248, 250, 252, 0.9));
+    radial-gradient(circle at 16% 0%, rgba(124, 58, 237, 0.1), transparent 17rem),
+    radial-gradient(circle at 100% 24%, rgba(0, 155, 114, 0.1), transparent 18rem);
 }
 
 @media (min-width: 480px) {
   .app-inner {
-    border: 1px solid rgba(255, 255, 255, 0.75) !important;
+    border: 10px solid #050b18 !important;
+    border-radius: 44px !important;
     box-shadow:
-      0 34px 90px rgba(15, 23, 42, 0.22),
+      0 34px 90px rgba(15, 23, 42, 0.24),
       inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
     backdrop-filter: blur(18px);
   }
 }
 
-/* Typography */
-.font-display {
-  letter-spacing: -0.04em;
-}
-
+.font-display { letter-spacing: -0.045em; }
 .text-ink,
-.text-\[\#1C1240\] {
-  color: var(--affordit-ink) !important;
-}
+.text-\[\#1C1240\] { color: var(--affordit-ink) !important; }
+.text-ink-2 { color: var(--affordit-muted) !important; }
+.text-ink-3 { color: #98a2b3 !important; }
+.text-brand { color: var(--affordit-brand) !important; }
+.text-safe { color: var(--affordit-safe) !important; }
+.text-caution { color: #d97706 !important; }
 
-.text-ink-2 {
-  color: var(--affordit-muted) !important;
-}
+.rounded-2xl,
+.rounded-xl,
+.rounded-btn,
+.rounded-card { border-radius: 22px !important; }
+.rounded-full { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24); }
 
-.text-ink-3 {
-  color: #98a2b3 !important;
-}
-
-.text-brand {
-  color: var(--affordit-brand) !important;
-}
-
-.text-safe {
-  color: var(--affordit-brand-2) !important;
-}
-
-.text-caution {
-  color: #d97706 !important;
-}
-
-/* Card polish */
 .rounded-2xl.bg-white,
 .rounded-2xl.bg-white.p-4,
 .w-36.flex-shrink-0.rounded-2xl.bg-white,
@@ -141,47 +113,24 @@ img {
 .bg-white.text-ink.shadow-sm,
 .bg-white.text-ink-2.hover\:text-ink.shadow-sm {
   background: var(--affordit-card) !important;
-  border: 1px solid rgba(255, 255, 255, 0.78) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08) !important;
   backdrop-filter: blur(18px);
 }
 
-.rounded-2xl,
-.rounded-xl,
-.rounded-btn,
-.rounded-card {
-  border-radius: 22px !important;
-}
-
-.rounded-full {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
-}
-
-/* Brand surfaces */
-.bg-brand,
-.bg-safe {
-  background: linear-gradient(135deg, var(--affordit-brand), var(--affordit-brand-2)) !important;
-}
-
-.bg-brand-soft {
-  background: rgba(37, 99, 235, 0.1) !important;
-}
-
+.bg-brand { background: linear-gradient(135deg, var(--affordit-brand), var(--affordit-brand-2)) !important; }
+.bg-safe { background: linear-gradient(135deg, #01785e, var(--affordit-safe-2)) !important; }
+.bg-brand-soft { background: rgba(124, 58, 237, 0.1) !important; }
 .bg-safe-bg {
-  background: linear-gradient(135deg, rgba(22, 163, 74, 0.14), rgba(34, 197, 94, 0.08)) !important;
-  border: 1px solid rgba(22, 163, 74, 0.18) !important;
+  background: linear-gradient(135deg, rgba(0, 155, 114, 0.16), rgba(0, 196, 140, 0.08)) !important;
+  border: 1px solid rgba(0, 155, 114, 0.18) !important;
 }
-
 .bg-caution-bg {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(251, 191, 36, 0.08)) !important;
   border: 1px solid rgba(245, 158, 11, 0.22) !important;
 }
+.bg-red-100 { background: rgba(254, 226, 226, 0.88) !important; }
 
-.bg-red-100 {
-  background: rgba(254, 226, 226, 0.88) !important;
-}
-
-/* Buttons */
 .rounded-btn,
 button.bg-brand,
 button.bg-safe,
@@ -190,77 +139,176 @@ button.bg-white {
   min-height: 44px;
   letter-spacing: -0.01em;
 }
-
 button.bg-brand,
 button.bg-safe {
   border: 0 !important;
   box-shadow:
-    0 18px 36px rgba(37, 99, 235, 0.24),
+    0 18px 36px rgba(124, 58, 237, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
 }
-
+button.bg-safe { box-shadow: 0 18px 36px rgba(0, 155, 114, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.24) !important; }
 button.bg-brand:hover,
-button.bg-safe:hover {
-  transform: translateY(-1px);
-  filter: saturate(1.06) brightness(1.03);
-}
-
+button.bg-safe:hover { transform: translateY(-1px); filter: saturate(1.06) brightness(1.03); }
 button.bg-white,
 button.border {
-  background: rgba(255, 255, 255, 0.78) !important;
+  background: rgba(255, 255, 255, 0.82) !important;
   border-color: rgba(226, 232, 240, 0.86) !important;
 }
+button:active { transform: scale(0.98); }
 
-button:active {
-  transform: scale(0.98);
-}
-
-/* Inputs */
 input,
 select {
-  background: rgba(255, 255, 255, 0.88) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
   border: 1px solid rgba(203, 213, 225, 0.82) !important;
-  box-shadow:
-    0 12px 28px rgba(15, 23, 42, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
 }
-
 input:focus,
 select:focus {
-  border-color: rgba(37, 99, 235, 0.55) !important;
-  box-shadow:
-    0 0 0 4px rgba(37, 99, 235, 0.12),
-    0 16px 32px rgba(15, 23, 42, 0.08) !important;
+  border-color: rgba(124, 58, 237, 0.52) !important;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12), 0 16px 32px rgba(15, 23, 42, 0.08) !important;
 }
 
-/* Landing hero */
-img[src="/affordit-theme.png"] + div {
+/* Welcome screen: match the supplied dark full-photo mockup */
+.app-inner > div[style*="min-height: 100svh"] > .relative.h-\[52\%\] {
+  position: absolute !important;
+  inset: 0 !important;
+  height: 100% !important;
+  min-height: 100svh !important;
+  z-index: 0 !important;
+}
+
+.app-inner > div[style*="min-height: 100svh"] > .relative.h-\[52\%\] img[src="/affordit-theme.png"] {
+  height: 100% !important;
+  object-position: center top !important;
+  filter: saturate(1.04) contrast(1.04);
+}
+
+.app-inner > div[style*="min-height: 100svh"] > .relative.h-\[52\%\] img[src="/affordit-theme.png"] + div {
   background:
-    linear-gradient(180deg, rgba(7, 17, 31, 0.18) 0%, rgba(7, 17, 31, 0.46) 48%, rgba(247, 249, 252, 0.96) 100%) !important;
+    linear-gradient(180deg, rgba(6, 18, 37, 0.08) 0%, rgba(6, 18, 37, 0.22) 30%, rgba(6, 18, 37, 0.78) 70%, #061225 100%) !important;
 }
 
-img[src="/affordit-theme.png"] ~ div h1 {
-  text-shadow: 0 18px 38px rgba(0, 0, 0, 0.38);
+.app-inner > div[style*="min-height: 100svh"] > .relative.h-\[52\%\] .absolute.inset-0.flex.flex-col.justify-end {
+  justify-content: center !important;
+  padding: 0 24px 170px !important;
 }
 
-/* Dashboard emphasis */
-.count-up {
-  animation: count-up 0.5s ease-out forwards;
-  position: relative;
+.app-inner > div[style*="min-height: 100svh"] > .relative.h-\[52\%\] h1 {
+  color: #fff !important;
+  font-size: 34px !important;
+  line-height: 1.04 !important;
+  max-width: 260px;
+  text-shadow: 0 18px 42px rgba(0, 0, 0, 0.55);
 }
 
-.count-up::after {
-  content: "Available now";
-  align-self: center;
-  margin-left: 0.5rem;
-  border-radius: 999px;
-  padding: 0.35rem 0.55rem;
-  background: rgba(22, 163, 74, 0.1);
-  color: var(--affordit-brand-2);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.app-inner > div[style*="min-height: 100svh"] > .relative.h-\[52\%\] h1::before {
+  content: "Affordit";
+  display: block;
+  margin-bottom: 16px;
+  font-family: "Plus Jakarta Sans", Inter, sans-serif;
+  font-size: 19px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.app-inner > div[style*="min-height: 100svh"] > .relative.h-\[52\%\] p {
+  max-width: 230px;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.app-inner > div[style*="min-height: 100svh"] > .flex-1.px-6.pt-4.pb-8.flex.flex-col.justify-center {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 2 !important;
+  min-height: auto !important;
+  padding: 0 22px 28px !important;
+  justify-content: flex-end !important;
+  background: linear-gradient(180deg, rgba(6, 18, 37, 0), #061225 34%) !important;
+  color: #fff !important;
+}
+
+.app-inner > div[style*="min-height: 100svh"] > .flex-1.px-6.pt-4.pb-8.flex.flex-col.justify-center label span {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.app-inner > div[style*="min-height: 100svh"] > .flex-1.px-6.pt-4.pb-8.flex.flex-col.justify-center input {
+  height: 48px !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1) !important;
+}
+
+.app-inner > div[style*="min-height: 100svh"] > .flex-1.px-6.pt-4.pb-8.flex.flex-col.justify-center > button.bg-brand {
+  height: 48px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5) !important;
+  box-shadow: 0 18px 34px rgba(124, 58, 237, 0.38) !important;
+}
+
+.app-inner > div[style*="min-height: 100svh"] > .flex-1.px-6.pt-4.pb-8.flex.flex-col.justify-center .text-xs,
+.app-inner > div[style*="min-height: 100svh"] > .flex-1.px-6.pt-4.pb-8.flex.flex-col.justify-center .text-ink-2,
+.app-inner > div[style*="min-height: 100svh"] > .flex-1.px-6.pt-4.pb-8.flex.flex-col.justify-center .text-ink-3 {
+  color: rgba(255, 255, 255, 0.52) !important;
+}
+
+.app-inner > div[style*="min-height: 100svh"] > .flex-1.px-6.pt-4.pb-8.flex.flex-col.justify-center .bg-gray-200 {
+  background: rgba(255, 255, 255, 0.24) !important;
+}
+
+.app-inner > div[style*="min-height: 100svh"] > .flex-1.px-6.pt-4.pb-8.flex.flex-col.justify-center button.bg-white {
+  height: 40px !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: none !important;
+}
+
+/* Dashboard: green safe card and compact mockup-like hierarchy */
+.count-up { animation: count-up 0.5s ease-out forwards; position: relative; }
+.count-up::after { display: none !important; }
+
+.px-5.pt-6.pb-4:has(.count-up) {
+  margin: 12px 20px 16px !important;
+  padding: 18px !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at 86% 12%, rgba(255, 255, 255, 0.26), transparent 8rem),
+    linear-gradient(135deg, #008866 0%, #00aa79 100%) !important;
+  box-shadow: 0 22px 46px rgba(0, 130, 93, 0.24) !important;
+  color: #fff !important;
+}
+
+.px-5.pt-6.pb-4:has(.count-up) .text-ink-2,
+.px-5.pt-6.pb-4:has(.count-up) .text-ink-3,
+.px-5.pt-6.pb-4:has(.count-up) .text-safe,
+.px-5.pt-6.pb-4:has(.count-up) .text-brand {
+  color: #fff !important;
+}
+
+.px-5.pt-6.pb-4:has(.count-up) .count-up span:last-of-type {
+  color: #fff !important;
+  font-size: 38px !important;
+}
+
+.px-5.pt-6.pb-4:has(.count-up) button {
+  color: #fff !important;
+}
+
+.px-5.pb-5 > button.bg-brand {
+  background: #fff !important;
+  color: var(--affordit-ink) !important;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08) !important;
+}
+
+.px-5.pb-5 > button.bg-brand .ml-auto {
+  background: var(--affordit-navy) !important;
+  color: #fff !important;
 }
 
 /* Dark affordability screens */
@@ -268,9 +316,9 @@ img[src="/affordit-theme.png"] ~ div h1 {
 [style*="#130D30"],
 [style*="#0D0926"] {
   background:
-    radial-gradient(circle at 20% -10%, rgba(37, 99, 235, 0.34), transparent 24rem),
-    radial-gradient(circle at 100% 30%, rgba(22, 163, 74, 0.2), transparent 22rem),
-    linear-gradient(180deg, #07111f 0%, #0f172a 100%) !important;
+    radial-gradient(circle at 20% -10%, rgba(124, 58, 237, 0.28), transparent 24rem),
+    radial-gradient(circle at 100% 30%, rgba(0, 155, 114, 0.2), transparent 22rem),
+    linear-gradient(180deg, #061225 0%, #0b1628 100%) !important;
 }
 
 .bg-white\/8,
@@ -284,66 +332,58 @@ img[src="/affordit-theme.png"] ~ div h1 {
 }
 
 [style*="rgba(108,71,255,0.15)"] {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(22, 163, 74, 0.1)) !important;
-  border: 1px solid rgba(147, 197, 253, 0.22) !important;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.92), rgba(79, 70, 229, 0.86)) !important;
+  border: 1px solid rgba(221, 214, 254, 0.28) !important;
+  box-shadow: 0 20px 42px rgba(79, 70, 229, 0.25) !important;
 }
+
+/* Budget and spend polish */
+.h-2.w-full.rounded-full.bg-gray-100 {
+  height: 6px !important;
+  background: #e7e2d8 !important;
+}
+.h-2.rounded-full.transition-all.duration-500 { height: 6px !important; }
 
 /* Bottom navigation */
 nav.border-t {
   border-top: 1px solid rgba(226, 232, 240, 0.78) !important;
-  background: rgba(255, 255, 255, 0.86) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
   box-shadow: 0 -18px 40px rgba(15, 23, 42, 0.07);
   backdrop-filter: blur(20px);
 }
-
 nav.border-t.bg-navy {
   border-top-color: rgba(255, 255, 255, 0.1) !important;
-  background: rgba(7, 17, 31, 0.82) !important;
+  background: rgba(6, 18, 37, 0.86) !important;
 }
-
-nav button {
-  border-radius: 18px !important;
-}
-
+nav button { border-radius: 18px !important; }
 nav button.bg-brand-soft,
-nav button.bg-white\/10 {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-}
+nav button.bg-white\/10 { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18); }
 
-/* Micro interactions */
 @keyframes count-up {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes chip-pop {
   0%   { opacity: 0; transform: scale(0.85); }
   65%  { transform: scale(1.05); }
   100% { opacity: 1; transform: scale(1); }
 }
-
-@keyframes float-soft {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
 .chip-pop { animation: chip-pop 0.3s ease-out forwards; }
 
 .w-36.flex-shrink-0.rounded-2xl.bg-white,
-.rounded-2xl.p-4[style*="#FDE8E4"] {
-  transition: transform 180ms ease, box-shadow 180ms ease;
-}
-
+.rounded-2xl.p-4[style*="#FDE8E4"] { transition: transform 180ms ease, box-shadow 180ms ease; }
 .w-36.flex-shrink-0.rounded-2xl.bg-white:hover,
 .rounded-2xl.p-4[style*="#FDE8E4"]:hover {
   transform: translateY(-2px);
   box-shadow: 0 22px 46px rgba(15, 23, 42, 0.11) !important;
 }
 
+@supports not selector(:has(*)) {
+  .px-5.pt-6.pb-4 { border-radius: 24px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
