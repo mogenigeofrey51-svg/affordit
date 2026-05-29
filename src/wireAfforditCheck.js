@@ -29,6 +29,16 @@ function isCheckScreen() {
   return /ask|check/i.test(activeNav?.textContent || "") && Boolean(document.querySelector('main input[placeholder="Enter amount"]'));
 }
 
+function isResultScreen() {
+  const verdictLabel = [...document.querySelectorAll("p")].find((node) =>
+    node.textContent?.trim().toLowerCase() === "verdict"
+  );
+  const resultHeading = [...document.querySelectorAll("h1")].find((node) =>
+    /slow down|hold up|try cheaper|skip it|you're good/i.test(node.textContent || "")
+  );
+  return Boolean(verdictLabel && resultHeading);
+}
+
 function replaceTextNode(root, from, to) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes = [];
@@ -175,7 +185,9 @@ function wireAddToPlanButton() {
 
 function refresh() {
   const checkVisible = isCheckScreen();
+  const resultVisible = isResultScreen();
   document.body.classList.toggle("affordit-check-wired", checkVisible);
+  document.body.classList.toggle("affordit-result-dark", resultVisible);
 
   if (checkVisible) {
     renameAskToCheck();
