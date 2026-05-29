@@ -197,9 +197,10 @@ body.affordit-check-wired main .space-y-2 button span {
 
 /* New engine verdict card. */
 .affordit-engine-verdict {
-  overflow: hidden;
+  overflow: visible;
   border-radius: 28px;
   padding: 20px;
+  margin-bottom: 18px;
   color: var(--check-text);
   border: 1px solid rgba(255, 255, 255, 0.88);
   background:
@@ -289,18 +290,25 @@ body.affordit-check-wired main .space-y-2 button span {
 }
 
 .affordit-action-row {
-  display: grid;
+  display: grid !important;
   grid-template-columns: 1.2fr 0.8fr;
   gap: 10px;
   margin-top: 16px;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .affordit-action-row button {
-  min-height: 48px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
   border: 0;
   border-radius: 16px;
   font-size: 13px;
   font-weight: 900;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .affordit-action-row button:first-child {
@@ -315,17 +323,18 @@ body.affordit-check-wired main .space-y-2 button span {
   border: 1px solid #e9dfd3;
 }
 
-/* Remove the long empty dark tail below the phone/app. */
+/* Let the user scroll to the new action buttons instead of clipping the card. */
+body.affordit-check-wired .app-inner,
 body.affordit-check-wired .app-inner > .flex.flex-col.flex-1.min-h-0,
-body.affordit-check-wired .app-inner > .flex.flex-col.flex-1.min-h-0 > .flex.flex-col.flex-1.min-h-0,
-body.affordit-check-wired .app-inner > .flex.flex-col.flex-1.min-h-0 > .flex.flex-col.flex-1.min-h-0 > main {
-  flex: 0 0 auto !important;
-  min-height: 0 !important;
+body.affordit-check-wired .app-inner > .flex.flex-col.flex-1.min-h-0 > .flex.flex-col.flex-1.min-h-0 {
+  min-height: 100svh !important;
 }
 
-body.affordit-check-wired .app-inner,
-body.affordit-check-wired .app-inner > .flex.flex-col.flex-1.min-h-0 {
-  min-height: auto !important;
+body.affordit-check-wired main {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding-bottom: 118px !important;
 }
 
 body.affordit-check-wired nav.border-t.bg-navy {
