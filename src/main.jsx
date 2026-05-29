@@ -5,6 +5,7 @@ import installAfforditCheckWiring from "./wireAfforditCheck.js";
 import "./styles.css";
 import "./home-refresh.css";
 import "./check-refresh.css";
+import "./result-refresh.css";
 
 function AfforditApp() {
   useEffect(() => {
