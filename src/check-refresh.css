@@ -1,17 +1,17 @@
 /* Check screen refresh: keeps current UI, makes the affordability page readable and wired. */
 
 :root {
-  --check-bg: #070b18;
-  --check-card: rgba(255, 255, 255, 0.08);
-  --check-card-strong: rgba(255, 255, 255, 0.12);
-  --check-border: rgba(255, 255, 255, 0.14);
-  --check-text: #f8fafc;
-  --check-muted: rgba(248, 250, 252, 0.64);
-  --check-purple: #8b5cf6;
+  --check-bg: #fbf7ef;
+  --check-card: #ffffff;
+  --check-card-strong: #ffffff;
+  --check-border: #e9dfd3;
+  --check-text: #07111f;
+  --check-muted: #667085;
+  --check-purple: #7c5cfc;
   --check-purple-2: #5b35f5;
-  --check-green: #2fd08a;
-  --check-amber: #ffb23e;
-  --check-red: #ff5c5c;
+  --check-green: #009b72;
+  --check-amber: #d97706;
+  --check-red: #ef4444;
 }
 
 /* Rename nav visually while React catches up. */
@@ -19,89 +19,112 @@ nav button:nth-child(2) {
   position: relative;
 }
 
-/* Stronger dark stage for Check so fields/cards are visible. */
+/* Light, readable Check page stage. */
 body.affordit-check-wired .app-inner,
 body.affordit-check-wired .bg-navy,
 body.affordit-check-wired [style*="#130D30"],
 body.affordit-check-wired [style*="#0D0926"] {
   background:
-    radial-gradient(circle at 16% -8%, rgba(139, 92, 246, 0.34), transparent 17rem),
-    radial-gradient(circle at 100% 28%, rgba(47, 208, 138, 0.18), transparent 18rem),
-    linear-gradient(180deg, #090d1c 0%, #07111f 100%) !important;
+    radial-gradient(circle at 18% 0%, rgba(124, 92, 252, 0.14), transparent 14rem),
+    radial-gradient(circle at 100% 18%, rgba(0, 155, 114, 0.12), transparent 13rem),
+    linear-gradient(180deg, #fffaf2 0%, var(--check-bg) 100%) !important;
 }
 
 body.affordit-check-wired main {
+  min-height: auto !important;
   background:
-    radial-gradient(circle at 80% 4%, rgba(139, 92, 246, 0.22), transparent 14rem),
-    linear-gradient(180deg, #090d1c 0%, #07111f 100%) !important;
+    radial-gradient(circle at 82% 0%, rgba(124, 92, 252, 0.12), transparent 13rem),
+    linear-gradient(180deg, #fffaf2 0%, var(--check-bg) 100%) !important;
+  padding-bottom: 0 !important;
 }
 
 body.affordit-check-wired main > .px-5.pt-6.pb-5 {
-  padding: 24px 22px 22px !important;
-  background:
-    linear-gradient(180deg, rgba(139, 92, 246, 0.18) 0%, rgba(139, 92, 246, 0.02) 100%) !important;
+  padding: 24px 22px 16px !important;
+  background: transparent !important;
 }
 
 body.affordit-check-wired h1 {
   color: var(--check-text) !important;
-  font-size: 32px !important;
+  font-size: 31px !important;
   line-height: 1 !important;
   letter-spacing: -0.06em !important;
+  text-shadow: none !important;
 }
 
 body.affordit-check-wired h1 + p {
   color: var(--check-muted) !important;
   font-size: 14px !important;
+  text-shadow: none !important;
 }
 
 body.affordit-check-wired main .space-y-4 {
-  padding: 0 22px 18px !important;
-  gap: 18px !important;
+  padding: 0 22px 14px !important;
+  gap: 14px !important;
 }
 
 body.affordit-check-wired main button,
 body.affordit-check-wired main input,
 body.affordit-check-wired main select {
-  color: var(--check-text);
+  color: var(--check-text) !important;
+}
+
+body.affordit-check-wired .text-white,
+body.affordit-check-wired .text-white\/60,
+body.affordit-check-wired .text-white\/70,
+body.affordit-check-wired .text-white\/80,
+body.affordit-check-wired .text-white\/50,
+body.affordit-check-wired .text-white\/40,
+body.affordit-check-wired .text-white\/45 {
+  color: var(--check-text) !important;
 }
 
 /* Category chips. */
+body.affordit-check-wired main .flex.gap-2.overflow-x-auto {
+  padding-bottom: 2px !important;
+}
+
 body.affordit-check-wired main .flex.gap-2.overflow-x-auto button {
   min-width: 74px !important;
   border-radius: 18px !important;
   border: 1px solid var(--check-border) !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: rgba(255, 255, 255, 0.72) !important;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16) !important;
+  background: rgba(255, 255, 255, 0.84) !important;
+  color: #475467 !important;
+  box-shadow: 0 10px 24px rgba(8, 18, 37, 0.06) !important;
 }
 
 body.affordit-check-wired main .flex.gap-2.overflow-x-auto button.bg-brand,
 body.affordit-check-wired main .flex.gap-2.overflow-x-auto button[class*="bg-brand"] {
   color: #fff !important;
   background: linear-gradient(135deg, var(--check-purple), var(--check-purple-2)) !important;
-  border-color: rgba(255, 255, 255, 0.22) !important;
+  border-color: rgba(124, 92, 252, 0.26) !important;
+  box-shadow: 0 14px 28px rgba(124, 92, 252, 0.2) !important;
+}
+
+body.affordit-check-wired main .flex.gap-2.overflow-x-auto button.bg-brand *,
+body.affordit-check-wired main .flex.gap-2.overflow-x-auto button[class*="bg-brand"] * {
+  color: #fff !important;
 }
 
 /* Amount card and inputs. */
 body.affordit-check-wired main [style*="rgba(255,255,255,0.07)"] {
-  border: 1px solid var(--check-border) !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  box-shadow: 0 18px 38px rgba(8, 18, 37, 0.08) !important;
   backdrop-filter: blur(20px);
 }
 
 body.affordit-check-wired main input:not([type="hidden"]),
 body.affordit-check-wired main input[placeholder="Enter amount"] {
-  height: 54px !important;
+  height: 48px !important;
   border-radius: 18px !important;
-  color: #fff !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255,255,255,0.14) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12) !important;
+  color: var(--check-text) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid #ece2d7 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 10px 22px rgba(8,18,37,0.04) !important;
 }
 
 body.affordit-check-wired main input::placeholder {
-  color: rgba(255, 255, 255, 0.36) !important;
+  color: #98a2b3 !important;
 }
 
 /* Existing verdict card: make readable. */
@@ -109,14 +132,14 @@ body.affordit-check-wired main .bg-safe-bg,
 body.affordit-check-wired main .bg-caution-bg,
 body.affordit-check-wired main .bg-red-100 {
   border-radius: 24px !important;
-  border: 1px solid rgba(47, 208, 138, 0.24) !important;
-  background: linear-gradient(135deg, rgba(47, 208, 138, 0.18), rgba(47, 208, 138, 0.06)) !important;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18) !important;
+  border: 1px solid rgba(0, 155, 114, 0.22) !important;
+  background: linear-gradient(135deg, rgba(0, 155, 114, 0.15), rgba(255, 255, 255, 0.86)) !important;
+  box-shadow: 0 16px 34px rgba(8, 18, 37, 0.06) !important;
 }
 
 body.affordit-check-wired main .bg-caution-bg {
-  border-color: rgba(255, 178, 62, 0.26) !important;
-  background: linear-gradient(135deg, rgba(255, 178, 62, 0.2), rgba(255, 178, 62, 0.07)) !important;
+  border-color: rgba(217, 119, 6, 0.24) !important;
+  background: linear-gradient(135deg, rgba(255, 178, 62, 0.2), rgba(255, 255, 255, 0.88)) !important;
 }
 
 body.affordit-check-wired main .bg-safe-bg p,
@@ -125,25 +148,51 @@ body.affordit-check-wired main .bg-red-100 p,
 body.affordit-check-wired main .bg-safe-bg .text-ink,
 body.affordit-check-wired main .bg-caution-bg .text-ink,
 body.affordit-check-wired main .bg-red-100 .text-ink {
-  color: #fff !important;
+  color: var(--check-text) !important;
+}
+
+body.affordit-check-wired main .text-safe {
+  color: var(--check-green) !important;
+}
+body.affordit-check-wired main .text-caution {
+  color: var(--check-amber) !important;
+}
+body.affordit-check-wired main .text-over {
+  color: var(--check-red) !important;
 }
 
 body.affordit-check-wired main .text-ink-2,
 body.affordit-check-wired main .text-ink-3 {
-  color: rgba(255, 255, 255, 0.58) !important;
+  color: var(--check-muted) !important;
 }
 
 /* AI purple card readability. */
 body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] {
   border-radius: 24px !important;
-  border: 1px solid rgba(221, 214, 254, 0.26) !important;
-  background: linear-gradient(135deg, rgba(124, 92, 252, 0.92), rgba(91, 53, 245, 0.86)) !important;
-  box-shadow: 0 22px 44px rgba(91, 53, 245, 0.24) !important;
+  border: 1px solid rgba(124, 92, 252, 0.24) !important;
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.14), rgba(255, 255, 255, 0.88)) !important;
+  box-shadow: 0 16px 34px rgba(124, 92, 252, 0.1) !important;
 }
 
 body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] p,
 body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] button {
-  color: #fff !important;
+  color: var(--check-text) !important;
+}
+body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] p:first-child,
+body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] button {
+  color: var(--check-purple) !important;
+}
+
+/* Popular ideas readability. */
+body.affordit-check-wired main .space-y-2 button {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.88) !important;
+  box-shadow: 0 10px 22px rgba(8, 18, 37, 0.05) !important;
+}
+
+body.affordit-check-wired main .space-y-2 button p,
+body.affordit-check-wired main .space-y-2 button span {
+  color: var(--check-text) !important;
 }
 
 /* New engine verdict card. */
@@ -151,12 +200,12 @@ body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] button {
   overflow: hidden;
   border-radius: 28px;
   padding: 20px;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.16);
+  color: var(--check-text);
+  border: 1px solid rgba(255, 255, 255, 0.88);
   background:
-    radial-gradient(circle at 92% 12%, rgba(47, 208, 138, 0.16), transparent 8rem),
-    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
-  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
+    radial-gradient(circle at 92% 12%, rgba(0, 155, 114, 0.12), transparent 8rem),
+    rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 38px rgba(8, 18, 37, 0.08);
   backdrop-filter: blur(20px);
 }
 
@@ -172,7 +221,7 @@ body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] button {
   font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.52);
+  color: var(--check-muted);
 }
 
 .affordit-engine-score {
@@ -185,8 +234,8 @@ body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] button {
   color: #061225;
 }
 
-.affordit-score-safe { background: var(--check-green); }
-.affordit-score-caution { background: var(--check-amber); }
+.affordit-score-safe { background: #2fd08a; }
+.affordit-score-caution { background: #ffb23e; }
 .affordit-score-over { background: var(--check-red); color: #fff; }
 
 .affordit-engine-verdict h2 {
@@ -195,11 +244,12 @@ body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] button {
   font-size: 26px;
   line-height: 1.05;
   letter-spacing: -0.055em;
+  color: var(--check-text);
 }
 
 .affordit-engine-copy {
   margin: 12px 0 0;
-  color: rgba(255,255,255,0.74);
+  color: #344054;
   font-size: 14px;
   line-height: 1.55;
 }
@@ -215,14 +265,14 @@ body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] button {
   min-width: 0;
   border-radius: 18px;
   padding: 12px 10px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid #eef2f6;
 }
 
 .affordit-impact-grid span {
   display: block;
   margin-bottom: 5px;
-  color: rgba(255,255,255,0.46);
+  color: #667085;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -235,7 +285,7 @@ body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] button {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 12px;
-  color: #fff;
+  color: var(--check-text);
 }
 
 .affordit-action-row {
@@ -254,15 +304,41 @@ body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] button {
 }
 
 .affordit-action-row button:first-child {
-  color: #fff;
+  color: #fff !important;
   background: linear-gradient(135deg, var(--check-purple), var(--check-purple-2));
-  box-shadow: 0 16px 30px rgba(91, 53, 245, 0.26);
+  box-shadow: 0 16px 30px rgba(91, 53, 245, 0.2);
 }
 
 .affordit-action-row button:last-child {
-  color: #fff;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--check-text) !important;
+  background: rgba(255,255,255,0.78);
+  border: 1px solid #e9dfd3;
+}
+
+/* Remove the long empty dark tail below the phone/app. */
+body.affordit-check-wired .app-inner > .flex.flex-col.flex-1.min-h-0,
+body.affordit-check-wired .app-inner > .flex.flex-col.flex-1.min-h-0 > .flex.flex-col.flex-1.min-h-0,
+body.affordit-check-wired .app-inner > .flex.flex-col.flex-1.min-h-0 > .flex.flex-col.flex-1.min-h-0 > main {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+}
+
+body.affordit-check-wired .app-inner,
+body.affordit-check-wired .app-inner > .flex.flex-col.flex-1.min-h-0 {
+  min-height: auto !important;
+}
+
+body.affordit-check-wired nav.border-t.bg-navy {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-top-color: rgba(226, 232, 240, 0.78) !important;
+}
+body.affordit-check-wired nav.border-t.bg-navy button {
+  color: #667085 !important;
+}
+body.affordit-check-wired nav.border-t.bg-navy button.bg-white\/10,
+body.affordit-check-wired nav.border-t.bg-navy button.bg-brand-soft {
+  color: var(--check-purple) !important;
+  background: rgba(124, 92, 252, 0.1) !important;
 }
 
 .affordit-toast {
