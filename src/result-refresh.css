@@ -1,0 +1,123 @@
+/* Result / verdict screen dark theme. */
+
+body.affordit-result-dark .app-inner,
+body.affordit-result-dark .bg-navy,
+body.affordit-result-dark [style*="#130D30"],
+body.affordit-result-dark [style*="#0D0926"] {
+  background:
+    radial-gradient(circle at 20% -8%, rgba(139, 92, 246, 0.38), transparent 17rem),
+    radial-gradient(circle at 100% 26%, rgba(47, 208, 138, 0.16), transparent 15rem),
+    linear-gradient(180deg, #0d1224 0%, #070b18 100%) !important;
+}
+
+body.affordit-result-dark main {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding-bottom: 118px !important;
+  background:
+    radial-gradient(circle at 82% 0%, rgba(139, 92, 246, 0.25), transparent 14rem),
+    linear-gradient(180deg, #0d1224 0%, #070b18 100%) !important;
+}
+
+body.affordit-result-dark main > .px-5.pt-6.pb-6 {
+  padding: 24px 22px 22px !important;
+  background: transparent !important;
+}
+
+body.affordit-result-dark h1,
+body.affordit-result-dark h2,
+body.affordit-result-dark p,
+body.affordit-result-dark span,
+body.affordit-result-dark div,
+body.affordit-result-dark button,
+body.affordit-result-dark .text-white,
+body.affordit-result-dark .text-white\/70,
+body.affordit-result-dark .text-white\/60,
+body.affordit-result-dark .text-white\/50,
+body.affordit-result-dark .text-white\/40 {
+  color: #f8fafc !important;
+  text-shadow: none !important;
+}
+
+body.affordit-result-dark main > .px-5.pt-6.pb-6 p:first-of-type {
+  color: #9aa4b2 !important;
+}
+
+body.affordit-result-dark main > .px-5.pt-6.pb-6 h1 {
+  color: #ffb23e !important;
+  font-size: 42px !important;
+  letter-spacing: -0.07em !important;
+}
+
+body.affordit-result-dark main > .px-5.pt-6.pb-6 h1 + p {
+  color: rgba(248, 250, 252, 0.72) !important;
+  max-width: 320px !important;
+}
+
+body.affordit-result-dark main .space-y-4 {
+  padding: 0 22px 20px !important;
+  gap: 16px !important;
+}
+
+body.affordit-result-dark main [style*="rgba(255,255,255,0.07)"],
+body.affordit-result-dark main [style*="rgba(255,255,255,0.06)"],
+body.affordit-result-dark main [style*="rgba(255,255,255,0.08)"] {
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.055)) !important;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.24) !important;
+  backdrop-filter: blur(22px);
+}
+
+body.affordit-result-dark .bg-safe-bg,
+body.affordit-result-dark .bg-caution-bg,
+body.affordit-result-dark .bg-red-100 {
+  border: 1px solid rgba(255,178,62,0.28) !important;
+  background: linear-gradient(135deg, rgba(255, 178, 62, 0.16), rgba(255,255,255,0.07)) !important;
+  color: #f8fafc !important;
+}
+
+body.affordit-result-dark .text-safe {
+  color: #2fd08a !important;
+}
+body.affordit-result-dark .text-caution {
+  color: #ffb23e !important;
+}
+body.affordit-result-dark .text-over {
+  color: #ff5c5c !important;
+}
+body.affordit-result-dark .text-brand {
+  color: #c4b5fd !important;
+}
+
+body.affordit-result-dark .grid.grid-cols-3 > div {
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  background: rgba(255,255,255,0.07) !important;
+}
+
+body.affordit-result-dark button.border,
+body.affordit-result-dark button[class*="border"] {
+  color: #f8fafc !important;
+  border: 1px solid rgba(255,255,255,0.16) !important;
+  background: rgba(255,255,255,0.08) !important;
+}
+
+body.affordit-result-dark button.bg-safe {
+  color: #061225 !important;
+  background: linear-gradient(135deg, #2fd08a, #00b978) !important;
+  box-shadow: 0 18px 34px rgba(47, 208, 138, 0.24) !important;
+}
+
+body.affordit-result-dark nav.border-t.bg-navy {
+  background: rgba(10, 15, 29, 0.92) !important;
+  border-top-color: rgba(255,255,255,0.12) !important;
+  box-shadow: 0 -18px 40px rgba(0,0,0,0.24) !important;
+}
+
+body.affordit-result-dark nav.border-t.bg-navy button {
+  color: rgba(248,250,252,0.5) !important;
+}
+body.affordit-result-dark nav.border-t.bg-navy button.bg-white\/10,
+body.affordit-result-dark nav.border-t.bg-navy button.bg-brand-soft {
+  color: #c4b5fd !important;
+  background: rgba(139, 92, 246, 0.16) !important;
+}
