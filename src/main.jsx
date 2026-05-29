@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import AfforditPrototype from "./App.jsx";
+import installAfforditCheckWiring from "./wireAfforditCheck.js";
 import "./styles.css";
 import "./home-refresh.css";
+import "./check-refresh.css";
 
 function AfforditApp() {
   useEffect(() => {
@@ -26,8 +28,13 @@ function AfforditApp() {
       loginButton.click();
     }
 
+    const uninstallCheckWiring = installAfforditCheckWiring();
     document.addEventListener("click", skipDuplicateLogin, true);
-    return () => document.removeEventListener("click", skipDuplicateLogin, true);
+
+    return () => {
+      uninstallCheckWiring?.();
+      document.removeEventListener("click", skipDuplicateLogin, true);
+    };
   }, []);
 
   return <AfforditPrototype />;
