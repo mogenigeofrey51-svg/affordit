@@ -1,0 +1,501 @@
+/* Affordit Home refresh: Gen Z lifestyle-finance direction.
+   This file intentionally layers on top of the current prototype styles so
+   the existing React logic/data stays untouched. */
+
+:root {
+  --cream-bg: #f8f2e8;
+  --cream-bg-2: #fffaf2;
+  --home-card: #ffffff;
+  --home-ink: #081225;
+  --home-muted: #6f7685;
+  --home-purple: #7c5cfc;
+  --home-purple-dark: #4d2eeb;
+  --home-purple-soft: #eee9ff;
+  --home-emerald: #06a77d;
+  --home-emerald-dark: #063f35;
+  --home-emerald-mid: #08775b;
+  --home-border: #ece2d7;
+  --home-shadow: 0 20px 45px rgba(8, 18, 37, 0.1);
+  --home-shadow-soft: 0 14px 34px rgba(8, 18, 37, 0.07);
+}
+
+/* Warm lifestyle stage instead of a flat phone column. */
+html,
+body {
+  background:
+    radial-gradient(circle at 12% 4%, rgba(124, 92, 252, 0.16), transparent 28rem),
+    radial-gradient(circle at 90% 92%, rgba(6, 167, 125, 0.18), transparent 30rem),
+    linear-gradient(135deg, #fffaf2 0%, var(--cream-bg) 48%, #fff7ec 100%) !important;
+}
+
+.min-h-screen.flex.items-center.justify-center:not(:has([style*="#130D30"])) {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(124, 92, 252, 0.12), transparent 25rem),
+    radial-gradient(circle at 88% 82%, rgba(6, 167, 125, 0.14), transparent 24rem),
+    linear-gradient(145deg, #fffaf2, var(--cream-bg)) !important;
+}
+
+.app-inner {
+  background:
+    radial-gradient(circle at 12% -2%, rgba(124, 92, 252, 0.1), transparent 13rem),
+    linear-gradient(180deg, #fffaf2 0%, var(--cream-bg) 100%) !important;
+}
+
+/* Home page scope. */
+main:has(.count-up) {
+  background:
+    radial-gradient(circle at 88% 0%, rgba(124, 92, 252, 0.12), transparent 13rem),
+    linear-gradient(180deg, #fffaf2 0%, var(--cream-bg) 100%) !important;
+  padding-bottom: 18px !important;
+}
+
+/* Header: more lifestyle, less dashboard. */
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 {
+  padding: 28px 22px 10px !important;
+  align-items: flex-start !important;
+}
+
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 p:first-child {
+  color: #626b7d !important;
+  font-size: 14px !important;
+  letter-spacing: -0.02em !important;
+  text-transform: none !important;
+  font-weight: 700 !important;
+}
+
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 h1 {
+  margin-top: 2px !important;
+  font-size: 34px !important;
+  line-height: 0.96 !important;
+  letter-spacing: -0.07em !important;
+  color: var(--home-ink) !important;
+}
+
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 h1::before {
+  content: "Wanjiku 👋";
+}
+
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 h1 {
+  font-size: 0 !important;
+}
+
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 h1::before {
+  font-size: 34px !important;
+}
+
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 p:last-child {
+  margin-top: 10px !important;
+  color: #667085 !important;
+  font-size: 14px !important;
+}
+
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 p:last-child::before {
+  content: "Let’s make today count ✨";
+}
+
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 p:last-child {
+  font-size: 0 !important;
+}
+
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 p:last-child::before {
+  font-size: 14px !important;
+}
+
+main:has(.count-up) > .flex.items-center.justify-between.px-5.pt-7.pb-2 > div:last-child {
+  width: 48px !important;
+  height: 48px !important;
+  border: 3px solid var(--home-purple) !important;
+  background:
+    linear-gradient(135deg, rgba(124, 92, 252, 0.18), rgba(255, 255, 255, 0.95)) !important;
+  color: var(--home-purple) !important;
+  box-shadow: 0 14px 30px rgba(124, 92, 252, 0.22) !important;
+}
+
+/* Hero: turn the existing safe-to-spend block into the big wallet card. */
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 230px !important;
+  margin: 10px 22px 20px !important;
+  padding: 24px 24px 22px !important;
+  border-radius: 32px !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  background:
+    radial-gradient(circle at 76% 64%, rgba(0, 255, 181, 0.22), transparent 8rem),
+    radial-gradient(circle at 105% -12%, rgba(255, 255, 255, 0.22), transparent 9rem),
+    linear-gradient(135deg, var(--home-emerald-dark) 0%, #075845 42%, var(--home-emerald) 100%) !important;
+  box-shadow: 0 26px 56px rgba(6, 98, 76, 0.28) !important;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(110deg, transparent 0 45%, rgba(255,255,255,0.08) 46% 48%, transparent 49% 100%),
+    url("data:image/svg+xml,%3Csvg width='420' height='220' viewBox='0 0 420 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 154C70 80 110 178 158 116C203 57 248 162 301 84C348 15 378 88 408 54' stroke='rgba(255,255,255,.34)' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M20 173C70 101 110 197 158 137C203 82 248 181 301 107C348 44 378 111 408 82' stroke='rgba(47,208,138,.32)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 88% 8%;
+  opacity: 0.86;
+  pointer-events: none;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up)::after {
+  content: "💸";
+  position: absolute;
+  right: 24px;
+  bottom: 28px;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 86px;
+  border-radius: 28px;
+  font-size: 44px;
+  background:
+    radial-gradient(circle at 32% 16%, rgba(255,255,255,0.42), transparent 2.6rem),
+    linear-gradient(145deg, #0ac28e, #047a5d);
+  box-shadow:
+    0 22px 42px rgba(3, 66, 52, 0.42),
+    inset 0 1px 0 rgba(255,255,255,0.32);
+  pointer-events: none;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) > * {
+  position: relative;
+  z-index: 1;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) p:first-child,
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) .text-ink-3 {
+  color: rgba(255, 255, 255, 0.82) !important;
+  font-size: 12px !important;
+  letter-spacing: 0.02em !important;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) p:first-child::before {
+  content: "● ";
+  color: #2fe0a0;
+  font-size: 18px;
+  vertical-align: -1px;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) .count-up {
+  margin-top: 22px !important;
+  gap: 8px !important;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) .count-up span:first-child {
+  color: rgba(255,255,255,0.82) !important;
+  font-size: 30px !important;
+  font-weight: 800 !important;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) .count-up span:last-of-type {
+  color: #fff !important;
+  font-size: 50px !important;
+  letter-spacing: -0.08em !important;
+  text-shadow: 0 12px 32px rgba(0,0,0,0.28);
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) .count-up button {
+  color: rgba(255,255,255,0.82) !important;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) > p.mt-1\.5 {
+  max-width: 210px !important;
+  margin-top: 12px !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 17px !important;
+  line-height: 1.5 !important;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) > p.mt-1\.5::before {
+  content: "After bills, goals & your usual spending.\A";
+  white-space: pre;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) > p.mt-1\.5 {
+  font-size: 0 !important;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) > p.mt-1\.5::before,
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) > p.mt-1\.5::after {
+  font-size: 17px !important;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) > p.mt-1\.5::after {
+  content: "3 days left in May";
+  display: inline-block;
+  margin-top: 10px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.18);
+  font-weight: 800;
+}
+
+main:has(.count-up) .px-5.pt-6.pb-4:has(.count-up) > button {
+  margin-top: 26px !important;
+  display: inline-flex !important;
+  width: auto !important;
+  min-height: 52px !important;
+  padding: 0 20px !important;
+  align-items: center !important;
+  gap: 12px !important;
+  color: var(--home-ink) !important;
+  background: #fff !important;
+  border-radius: 18px !important;
+  box-shadow: 0 16px 34px rgba(0,0,0,0.16) !important;
+}
+
+/* Primary afford check CTA. */
+main:has(.count-up) .px-5.pb-5 {
+  padding: 0 22px 22px !important;
+}
+
+main:has(.count-up) .px-5.pb-5 > button.bg-brand {
+  height: 86px !important;
+  justify-content: flex-start !important;
+  gap: 18px !important;
+  padding: 16px 18px !important;
+  border-radius: 28px !important;
+  color: var(--home-ink) !important;
+  background: rgba(255,255,255,0.94) !important;
+  border: 1px solid rgba(255,255,255,0.78) !important;
+  box-shadow: var(--home-shadow-soft) !important;
+}
+
+main:has(.count-up) .px-5.pb-5 > button.bg-brand > span:first-child {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  color: var(--home-purple);
+  background: var(--home-purple-soft);
+  font-size: 24px !important;
+}
+
+main:has(.count-up) .px-5.pb-5 > button.bg-brand::after {
+  content: "Ask before you buy anything.";
+  position: absolute;
+  left: 92px;
+  margin-top: 28px;
+  color: var(--home-purple);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+main:has(.count-up) .px-5.pb-5 > button.bg-brand .ml-auto {
+  width: 54px !important;
+  height: 54px !important;
+  border-radius: 50% !important;
+  color: #fff !important;
+  background: var(--home-ink) !important;
+  box-shadow: 0 16px 28px rgba(8, 18, 37, 0.18) !important;
+}
+
+/* Quick-action illusion: compact shortcuts below the afford CTA without touching app logic. */
+main:has(.count-up) .px-5.pb-5::after {
+  content: "Scan & pay      Send money      Bills      Add money";
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+  padding: 16px 6px 0;
+  color: var(--home-ink);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  white-space: pre;
+}
+
+/* Goals carousel: richer lifestyle cards. */
+main:has(.count-up) .flex.items-center.justify-between.px-5.mb-3 {
+  padding: 2px 22px 0 !important;
+  margin-bottom: 12px !important;
+}
+
+main:has(.count-up) .flex.items-center.justify-between.px-5.mb-3 p {
+  color: var(--home-ink) !important;
+  font-size: 20px !important;
+  letter-spacing: -0.03em !important;
+  text-transform: none !important;
+  font-weight: 900 !important;
+}
+
+main:has(.count-up) .flex.items-center.justify-between.px-5.mb-3 button {
+  color: var(--home-purple) !important;
+  font-size: 16px !important;
+}
+
+main:has(.count-up) .flex.gap-3.overflow-x-auto.scrollbar-none.px-5.pb-3 {
+  gap: 14px !important;
+  padding-left: 22px !important;
+  padding-right: 22px !important;
+  padding-bottom: 18px !important;
+}
+
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white {
+  position: relative !important;
+  overflow: hidden !important;
+  width: 168px !important;
+  min-height: 210px !important;
+  padding: 18px !important;
+  border-radius: 28px !important;
+  color: #fff !important;
+  border: 0 !important;
+  box-shadow: var(--home-shadow) !important;
+}
+
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white:nth-child(1) {
+  background:
+    linear-gradient(180deg, rgba(8,18,37,0.08), rgba(8,18,37,0.74)),
+    radial-gradient(circle at 30% 20%, #a7f3d0, transparent 7rem),
+    linear-gradient(135deg, #4fbf9b, #0f766e) !important;
+}
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white:nth-child(2) {
+  background:
+    linear-gradient(180deg, rgba(8,18,37,0.08), rgba(8,18,37,0.72)),
+    radial-gradient(circle at 62% 30%, #ddd6fe, transparent 7rem),
+    linear-gradient(135deg, #9b8cff, #25134d) !important;
+}
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white:nth-child(3) {
+  background:
+    linear-gradient(180deg, rgba(8,18,37,0.08), rgba(8,18,37,0.72)),
+    radial-gradient(circle at 60% 26%, #fed7aa, transparent 7rem),
+    linear-gradient(135deg, #f97316, #41110a) !important;
+}
+
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white p,
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white .text-ink,
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white .text-ink-2,
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white .text-ink-3 {
+  color: #fff !important;
+}
+
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white p:first-child {
+  font-size: 17px !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.04em;
+}
+
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white p:nth-child(2) {
+  position: absolute;
+  left: 18px;
+  bottom: 26px;
+  font-size: 18px !important;
+  font-weight: 900;
+}
+
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white .text-2xl {
+  position: absolute;
+  right: 16px;
+  top: 52px;
+  font-size: 54px !important;
+  filter: drop-shadow(0 12px 20px rgba(0,0,0,0.22));
+}
+
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white .relative {
+  width: 52px !important;
+  height: 52px !important;
+  position: absolute !important;
+  right: 16px;
+  bottom: 38px;
+}
+
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white .relative + *,
+main:has(.count-up) .w-36.flex-shrink-0.rounded-2xl.bg-white p.text-\[10px\] {
+  opacity: 0.72;
+}
+
+/* Insight: dark lifestyle card. */
+main:has(.count-up) .px-5.mt-3.pb-8 {
+  padding: 4px 22px 28px !important;
+}
+
+main:has(.count-up) .px-5.mt-3.pb-8 > p {
+  display: none !important;
+}
+
+main:has(.count-up) .rounded-2xl.p-4[style*="#FDE8E4"] {
+  position: relative;
+  overflow: hidden;
+  min-height: 126px;
+  padding: 22px 22px 22px 104px !important;
+  border-radius: 28px !important;
+  color: #fff !important;
+  background:
+    radial-gradient(circle at 86% 28%, rgba(124, 92, 252, 0.28), transparent 8rem),
+    linear-gradient(135deg, #0f172a, #07111f) !important;
+  box-shadow: 0 22px 48px rgba(8, 18, 37, 0.18) !important;
+}
+
+main:has(.count-up) .rounded-2xl.p-4[style*="#FDE8E4"]::after {
+  content: "☕";
+  position: absolute;
+  right: 22px;
+  bottom: 8px;
+  font-size: 64px;
+  opacity: 0.86;
+  filter: drop-shadow(0 16px 20px rgba(0,0,0,0.28));
+}
+
+main:has(.count-up) .rounded-2xl.p-4[style*="#FDE8E4"] .flex.h-11.w-11 {
+  position: absolute;
+  left: 24px;
+  top: 34px;
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 22px !important;
+  background: rgba(6, 167, 125, 0.18) !important;
+}
+
+main:has(.count-up) .rounded-2xl.p-4[style*="#FDE8E4"] p:first-child,
+main:has(.count-up) .rounded-2xl.p-4[style*="#FDE8E4"] p.mb-1 {
+  color: #2fe0a0 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.08em !important;
+}
+
+main:has(.count-up) .rounded-2xl.p-4[style*="#FDE8E4"] p.mb-1::before {
+  content: "MONEY INSIGHT";
+}
+main:has(.count-up) .rounded-2xl.p-4[style*="#FDE8E4"] p.mb-1 {
+  font-size: 0 !important;
+}
+main:has(.count-up) .rounded-2xl.p-4[style*="#FDE8E4"] p.mb-1::before {
+  font-size: 11px !important;
+}
+
+main:has(.count-up) .rounded-2xl.p-4[style*="#FDE8E4"] p.text-\[13px\] {
+  max-width: 230px;
+  color: rgba(255,255,255,0.9) !important;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+}
+
+/* Bottom nav: elevated white lifestyle tab bar. */
+nav.border-t:not(.bg-navy) {
+  margin: 0 0 0 !important;
+  padding: 12px 18px 22px !important;
+  border-top: 1px solid rgba(255,255,255,0.8) !important;
+  background: rgba(255,255,255,0.92) !important;
+  border-radius: 28px 28px 0 0 !important;
+  box-shadow: 0 -18px 42px rgba(8, 18, 37, 0.09) !important;
+}
+
+nav.border-t:not(.bg-navy) button {
+  min-height: 58px !important;
+  gap: 5px !important;
+  font-size: 12px !important;
+}
+
+nav.border-t:not(.bg-navy) button.bg-brand-soft {
+  color: var(--home-purple) !important;
+  background: transparent !important;
+}
+
+nav.border-t:not(.bg-navy) button.bg-brand-soft svg {
+  fill: var(--home-purple);
+}
