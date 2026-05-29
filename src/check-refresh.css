@@ -1,0 +1,292 @@
+/* Check screen refresh: keeps current UI, makes the affordability page readable and wired. */
+
+:root {
+  --check-bg: #070b18;
+  --check-card: rgba(255, 255, 255, 0.08);
+  --check-card-strong: rgba(255, 255, 255, 0.12);
+  --check-border: rgba(255, 255, 255, 0.14);
+  --check-text: #f8fafc;
+  --check-muted: rgba(248, 250, 252, 0.64);
+  --check-purple: #8b5cf6;
+  --check-purple-2: #5b35f5;
+  --check-green: #2fd08a;
+  --check-amber: #ffb23e;
+  --check-red: #ff5c5c;
+}
+
+/* Rename nav visually while React catches up. */
+nav button:nth-child(2) {
+  position: relative;
+}
+
+/* Stronger dark stage for Check so fields/cards are visible. */
+body.affordit-check-wired .app-inner,
+body.affordit-check-wired .bg-navy,
+body.affordit-check-wired [style*="#130D30"],
+body.affordit-check-wired [style*="#0D0926"] {
+  background:
+    radial-gradient(circle at 16% -8%, rgba(139, 92, 246, 0.34), transparent 17rem),
+    radial-gradient(circle at 100% 28%, rgba(47, 208, 138, 0.18), transparent 18rem),
+    linear-gradient(180deg, #090d1c 0%, #07111f 100%) !important;
+}
+
+body.affordit-check-wired main {
+  background:
+    radial-gradient(circle at 80% 4%, rgba(139, 92, 246, 0.22), transparent 14rem),
+    linear-gradient(180deg, #090d1c 0%, #07111f 100%) !important;
+}
+
+body.affordit-check-wired main > .px-5.pt-6.pb-5 {
+  padding: 24px 22px 22px !important;
+  background:
+    linear-gradient(180deg, rgba(139, 92, 246, 0.18) 0%, rgba(139, 92, 246, 0.02) 100%) !important;
+}
+
+body.affordit-check-wired h1 {
+  color: var(--check-text) !important;
+  font-size: 32px !important;
+  line-height: 1 !important;
+  letter-spacing: -0.06em !important;
+}
+
+body.affordit-check-wired h1 + p {
+  color: var(--check-muted) !important;
+  font-size: 14px !important;
+}
+
+body.affordit-check-wired main .space-y-4 {
+  padding: 0 22px 18px !important;
+  gap: 18px !important;
+}
+
+body.affordit-check-wired main button,
+body.affordit-check-wired main input,
+body.affordit-check-wired main select {
+  color: var(--check-text);
+}
+
+/* Category chips. */
+body.affordit-check-wired main .flex.gap-2.overflow-x-auto button {
+  min-width: 74px !important;
+  border-radius: 18px !important;
+  border: 1px solid var(--check-border) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16) !important;
+}
+
+body.affordit-check-wired main .flex.gap-2.overflow-x-auto button.bg-brand,
+body.affordit-check-wired main .flex.gap-2.overflow-x-auto button[class*="bg-brand"] {
+  color: #fff !important;
+  background: linear-gradient(135deg, var(--check-purple), var(--check-purple-2)) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* Amount card and inputs. */
+body.affordit-check-wired main [style*="rgba(255,255,255,0.07)"] {
+  border: 1px solid var(--check-border) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22) !important;
+  backdrop-filter: blur(20px);
+}
+
+body.affordit-check-wired main input:not([type="hidden"]),
+body.affordit-check-wired main input[placeholder="Enter amount"] {
+  height: 54px !important;
+  border-radius: 18px !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+body.affordit-check-wired main input::placeholder {
+  color: rgba(255, 255, 255, 0.36) !important;
+}
+
+/* Existing verdict card: make readable. */
+body.affordit-check-wired main .bg-safe-bg,
+body.affordit-check-wired main .bg-caution-bg,
+body.affordit-check-wired main .bg-red-100 {
+  border-radius: 24px !important;
+  border: 1px solid rgba(47, 208, 138, 0.24) !important;
+  background: linear-gradient(135deg, rgba(47, 208, 138, 0.18), rgba(47, 208, 138, 0.06)) !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18) !important;
+}
+
+body.affordit-check-wired main .bg-caution-bg {
+  border-color: rgba(255, 178, 62, 0.26) !important;
+  background: linear-gradient(135deg, rgba(255, 178, 62, 0.2), rgba(255, 178, 62, 0.07)) !important;
+}
+
+body.affordit-check-wired main .bg-safe-bg p,
+body.affordit-check-wired main .bg-caution-bg p,
+body.affordit-check-wired main .bg-red-100 p,
+body.affordit-check-wired main .bg-safe-bg .text-ink,
+body.affordit-check-wired main .bg-caution-bg .text-ink,
+body.affordit-check-wired main .bg-red-100 .text-ink {
+  color: #fff !important;
+}
+
+body.affordit-check-wired main .text-ink-2,
+body.affordit-check-wired main .text-ink-3 {
+  color: rgba(255, 255, 255, 0.58) !important;
+}
+
+/* AI purple card readability. */
+body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] {
+  border-radius: 24px !important;
+  border: 1px solid rgba(221, 214, 254, 0.26) !important;
+  background: linear-gradient(135deg, rgba(124, 92, 252, 0.92), rgba(91, 53, 245, 0.86)) !important;
+  box-shadow: 0 22px 44px rgba(91, 53, 245, 0.24) !important;
+}
+
+body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] p,
+body.affordit-check-wired main [style*="rgba(108,71,255,0.15)"] button {
+  color: #fff !important;
+}
+
+/* New engine verdict card. */
+.affordit-engine-verdict {
+  overflow: hidden;
+  border-radius: 28px;
+  padding: 20px;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.16);
+  background:
+    radial-gradient(circle at 92% 12%, rgba(47, 208, 138, 0.16), transparent 8rem),
+    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(20px);
+}
+
+.affordit-engine-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.affordit-engine-label {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.affordit-engine-score {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 900;
+  color: #061225;
+}
+
+.affordit-score-safe { background: var(--check-green); }
+.affordit-score-caution { background: var(--check-amber); }
+.affordit-score-over { background: var(--check-red); color: #fff; }
+
+.affordit-engine-verdict h2 {
+  margin: 16px 0 0;
+  max-width: 270px;
+  font-size: 26px;
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+}
+
+.affordit-engine-copy {
+  margin: 12px 0 0;
+  color: rgba(255,255,255,0.74);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.affordit-impact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.affordit-impact-grid div {
+  min-width: 0;
+  border-radius: 18px;
+  padding: 12px 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.affordit-impact-grid span {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(255,255,255,0.46);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.affordit-impact-grid strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #fff;
+}
+
+.affordit-action-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.affordit-action-row button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.affordit-action-row button:first-child {
+  color: #fff;
+  background: linear-gradient(135deg, var(--check-purple), var(--check-purple-2));
+  box-shadow: 0 16px 30px rgba(91, 53, 245, 0.26);
+}
+
+.affordit-action-row button:last-child {
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.affordit-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 9999;
+  max-width: min(360px, calc(100vw - 32px));
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 999px;
+  padding: 12px 16px;
+  color: #fff;
+  background: rgba(7, 17, 31, 0.92);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+  backdrop-filter: blur(18px);
+  font-size: 13px;
+  font-weight: 800;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.affordit-toast.is-visible {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
