@@ -12,24 +12,39 @@ const categoryByLabel = {
 };
 
 function findCheckHeading() {
-  return [...document.querySelectorAll("h1")].find((node) =>
-    /can i afford this/i.test(node.textContent || "")
-  );
+  return [...document.querySelectorAll("h1")].find((node) => {
+    const text = node.textContent || "";
+    return /can i afford this/i.test(text) || /check before you spend/i.test(text);
+  });
 }
 
 function isCheckScreen() {
-  return Boolean(findCheckHeading());
+  const heading = findCheckHeading();
+  if (heading) return true;
+
+  const activeNav = [...document.querySelectorAll("nav button")].find((button) =>
+    button.className?.toString().includes("bg-white/10") || button.className?.toString().includes("bg-brand-soft")
+  );
+
+  return /ask|check/i.test(activeNav?.textContent || "") && Boolean(document.querySelector('main input[placeholder="Enter amount"]'));
+}
+
+function replaceTextNode(root, from, to) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach((node) => {
+    if (node.nodeValue?.trim() === from) node.nodeValue = node.nodeValue.replace(from, to);
+  });
 }
 
 function renameAskToCheck() {
-  [...document.querySelectorAll("button, p, h1, span")].forEach((node) => {
-    if ((node.childNodes?.length || 0) === 1 && node.textContent?.trim() === "Ask") {
-      node.textContent = "Check";
-    }
-  });
+  replaceTextNode(document.body, "Ask", "Check");
 
   const heading = findCheckHeading();
-  if (heading) heading.textContent = "Check before you spend";
+  if (heading && heading.textContent !== "Check before you spend") {
+    heading.textContent = "Check before you spend";
+  }
 
   [...document.querySelectorAll("p")].forEach((node) => {
     if (node.textContent?.trim() === "Let's check your plan") {
@@ -161,25 +176,39 @@ function wireAddToPlanButton() {
 function refresh() {
   const checkVisible = isCheckScreen();
   document.body.classList.toggle("affordit-check-wired", checkVisible);
-  renameAskToCheck();
+
   if (checkVisible) {
+    renameAskToCheck();
     renderEngineCard();
     wireAddToPlanButton();
+  } else {
+    replaceTextNode(document.body, "Ask", "Check");
   }
 }
 
 export function installAfforditCheckWiring() {
   refresh();
 
-  const observer = new MutationObserver(() => refresh());
+  let scheduled = false;
+  const scheduleRefresh = () => {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      refresh();
+    });
+  };
+
+  const observer = new MutationObserver(scheduleRefresh);
   observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
-  document.addEventListener("input", refresh, true);
-  document.addEventListener("click", () => setTimeout(refresh, 0), true);
+  document.addEventListener("input", scheduleRefresh, true);
+  document.addEventListener("click", scheduleRefresh, true);
 
   return () => {
     observer.disconnect();
-    document.removeEventListener("input", refresh, true);
+    document.removeEventListener("input", scheduleRefresh, true);
+    document.removeEventListener("click", scheduleRefresh, true);
   };
 }
 
